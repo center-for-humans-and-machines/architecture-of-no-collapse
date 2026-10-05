@@ -61,7 +61,10 @@ def build_agents(config: RunConfig, seed: int) -> list[Agent]:
 
 
 def build_interventions(config: RunConfig) -> list:
-    return [Registry.get("intervention", iv.type)() for iv in config.interventions]
+    return [
+        Registry.get("intervention", iv.type)(**iv.options)
+        for iv in config.interventions
+    ]
 
 
 def _attach_llm_call_log(run_dir: Path) -> logging.Handler:

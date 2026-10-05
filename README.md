@@ -63,6 +63,38 @@ served with `--task embed`); force them on for a config with empty
 poetry run renewal run configs/smoke_vllm.yaml --metrics
 ```
 
+## Interventions
+
+The `scaffolder` intervention is a three-level novelty controller that reacts
+each turn to the **adjacent similarity** of the latest model turn (cosine vs.
+the previous turn; higher = more repetition = more collapse):
+
+| Level | Trigger | Action |
+| --- | --- | --- |
+| `deepen` | adjacent sim `< threshold` | rotate: "Add one concrete detail.", "Give one specific example.", "Develop one consequence.", "Name one edge case." |
+| `innovate` | adjacent sim `>= threshold` (first time) | rotate: "Introduce a genuinely new idea…", "Take this topic in an unexpected…", "Add a new concept…", "Find a non-obvious neighboring idea…" |
+| `inject` | adjacent sim `>= threshold` again | sample 3 GloVe words → Tavily search → surface the top hit as a new topic |
+
+Every message records its `level`, `signal`, `threshold`, and (for `inject`)
+the sampled `words`, `query`, `source_url`, and `source_title` in `meta`.
+
+`visibility` controls whether steering messages persist in history:
+
+- `all` (default) — every message is canonical history.
+- `injections` — only level-3 injections persist; deepen/innovate nudges are
+  prompt-scoped and dropped after the next turn.
+- `transient` — all steering messages are prompt-scoped.
+
+Offline smoke (fake LLM + fake embedding, no Tavily, no word-vector download):
+
+```bash
+poetry run renewal run configs/scaffolder_smoke.yaml
+```
+
+A live run sets `embedding: { provider: vllm, model: Qwen/Qwen3-Embedding-8B }`
+and requires `TAVILY_API_KEY` (used only when a level-3 injection fires) plus
+the GloVe word vectors, downloaded and cached on first use.
+
 ## Viewer
 
 A standalone web app (FastAPI + Svelte + Plotly) for browsing runs, reading

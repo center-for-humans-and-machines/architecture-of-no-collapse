@@ -2,9 +2,11 @@
 
 ``Message`` is the only record of a turn. Roles are ``system`` (per-agent,
 prompt-scoped only), ``user`` / ``assistant`` (agent turns), and
-``intervention`` (messages appended by an Intervention plugin). There is no
-transient flag: every message an intervention appends becomes canonical
-history.
+``intervention`` (messages appended by an Intervention plugin).
+
+``transient`` marks a message as prompt-scoped: the loop includes it in the
+next agent's prompt but does not store it in canonical history (Kong-style
+noise, or steering nudges that should not accumulate).
 """
 
 from __future__ import annotations
@@ -22,6 +24,7 @@ class Message:
     content: str
     turn_index: int
     meta: dict[str, Any] = field(default_factory=dict)
+    transient: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -30,6 +33,7 @@ class Message:
             "content": self.content,
             "turn_index": self.turn_index,
             "meta": dict(self.meta),
+            "transient": self.transient,
         }
 
     @classmethod
@@ -40,4 +44,5 @@ class Message:
             content=data["content"],
             turn_index=data["turn_index"],
             meta=dict(data.get("meta", {})),
+            transient=bool(data.get("transient", False)),
         )

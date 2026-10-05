@@ -1,7 +1,9 @@
 """The single plug-in interface for perturbing the loop.
 
 An Intervention takes the current message history and returns a new Message to
-append, or None for a no-op. Its internal logic is irrelevant to the loop.
+append, or None for a no-op. Its internal logic is irrelevant to the loop. A
+returned Message may set ``transient=True`` to be prompt-scoped only (fed to the
+next agent's prompt and dropped, never stored in canonical history).
 """
 
 from __future__ import annotations

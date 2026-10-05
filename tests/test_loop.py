@@ -52,6 +52,15 @@ class AppendIntervention:
         return Message("intervention", "append", f"note {len(messages)}", 0)
 
 
+class TransientIntervention:
+    name = "transient"
+
+    async def act(self, messages):
+        return Message(
+            "intervention", "transient", "nudge", len(messages), transient=True
+        )
+
+
 async def test_intervention_appends_to_history():
     agents = _agents(2)
     recorder = NullRecorder()
@@ -62,6 +71,27 @@ async def test_intervention_appends_to_history():
     assert len(loop.history) == 8
     assert len(recorder.interventions) == 4
     assert sum(1 for m in loop.history if m.role == "intervention") == 4
+
+
+async def test_transient_intervention_prompted_but_not_stored():
+    captured = {}
+
+    class CapturingLLM(FakeLLM):
+        async def generate(self, messages, params):
+            captured["contents"] = [m.content for m in messages]
+            return "ok"
+
+    agent = Agent(name="agent_0", llm=CapturingLLM(), system_prompt="SYS", params={})
+    recorder = NullRecorder()
+    loop = Loop([agent], Scheduler(1, 0), [TransientIntervention()], recorder)
+    await loop.run(2)
+
+    # The transient nudge never enters canonical history...
+    assert len(loop.history) == 2
+    assert all(m.role == "assistant" for m in loop.history)
+    # ...but it did reach the next agent's prompt and the recorder.
+    assert "nudge" in captured["contents"]
+    assert len(recorder.interventions) == 2
 
 
 async def test_prompt_includes_system_and_history():

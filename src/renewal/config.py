@@ -76,6 +76,7 @@ class InterventionConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     type: str
+    options: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _check_registered(self) -> "InterventionConfig":
