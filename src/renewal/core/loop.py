@@ -10,6 +10,7 @@ run leaves a complete transcript and event stream.
 from __future__ import annotations
 
 import logging
+from collections.abc import Awaitable, Callable
 
 from renewal.core.agent import Agent
 from renewal.core.message import Message
@@ -26,11 +27,16 @@ class Loop:
         scheduler: Scheduler,
         interventions: list[Intervention],
         recorder: object,
+        *,
+        window_size: int | None = None,
+        on_window: Callable[[int, list[Message]], Awaitable[None]] | None = None,
     ) -> None:
         self.agents = agents
         self.scheduler = scheduler
         self.interventions = interventions
         self.recorder = recorder
+        self.window_size = window_size
+        self.on_window = on_window
         self.history: list[Message] = []
 
     async def run(self, rounds: int) -> None:
@@ -52,3 +58,30 @@ class Loop:
                     if extra is not None:
                         self.history.append(extra)
                         self.recorder.intervention(extra)
+
+            if self.window_size is not None and self.on_window is not None:
+                if (round_index + 1) % self.window_size == 0:
+                    await self._emit_window(round_index)
+
+        # Emit a final partial window when the round count is not a multiple of
+        # the window size, so short runs (rounds < window_size) still yield one
+        # window of metrics.
+        if (
+            self.window_size is not None
+            and self.on_window is not None
+            and rounds > 0
+            and rounds % self.window_size != 0
+        ):
+            await self._emit_window(rounds - 1)
+
+    async def _emit_window(self, round_index: int) -> None:
+        assert self.window_size is not None and self.on_window is not None
+        window_index = round_index // self.window_size
+        start = window_index * self.window_size
+        end = start + self.window_size
+        turns = [
+            m
+            for m in self.history
+            if m.role == "assistant" and start <= m.meta.get("round", -1) < end
+        ]
+        await self.on_window(window_index, turns)

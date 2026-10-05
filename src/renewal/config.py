@@ -21,6 +21,7 @@ from pydantic import (
 )
 
 from renewal.llm.config import LLMConfig
+from renewal.llm.embed import FakeEmbedding, VllmEmbedding
 from renewal.registry import Registry
 
 LOGGER = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ LOGGER = logging.getLogger(__name__)
 def ensure_builtins() -> None:
     """Import plugin packages so their registry entries resolve."""
     import renewal.interventions  # noqa: F401
+    import renewal.metrics  # noqa: F401
 
 
 class RunSettings(BaseModel):
@@ -84,11 +86,40 @@ class InterventionConfig(BaseModel):
         return self
 
 
+class EmbeddingConfig(BaseModel):
+    """Select the embedding model used by the semantic metrics."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    provider: Literal["vllm", "fake"] = "vllm"
+    model: str = "Qwen/Qwen3-Embedding-8B"
+    dim: int | None = None
+
+    def materialize(self):
+        """Build the selected embedding client."""
+        match self.provider:
+            case "vllm":
+                return VllmEmbedding(model=self.model)
+            case "fake":
+                return FakeEmbedding(model=self.model, dim=self.dim)
+        raise ValueError(f"unknown embedding provider: {self.provider}")
+
+
 class MetricsConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     window_size: int = Field(default=10, ge=1)
+    embedding: EmbeddingConfig = Field(default_factory=EmbeddingConfig)
     enabled: list[str] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _check_enabled(self) -> "MetricsConfig":
+        for name in self.enabled:
+            try:
+                Registry.get("metric", name)
+            except KeyError as error:
+                raise ValueError(str(error)) from error
+        return self
 
 
 class LoggingConfig(BaseModel):

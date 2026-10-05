@@ -25,6 +25,8 @@ from renewal.core.agent import Agent
 from renewal.core.loop import Loop
 from renewal.core.scheduler import Scheduler
 from renewal.logging_setup import attach_file_log, configure_logging, detach_file_log
+from renewal.metrics.analyze import run_analyze
+from renewal.metrics.base import build_metric_runner, enabled_metrics
 from renewal.prompts.loader import PromptSource
 from renewal.registry import Registry
 
@@ -77,6 +79,7 @@ async def run_replicate(
     run_dir: Path,
     seed: int,
     debug: bool = False,
+    force_metrics: bool = False,
 ) -> dict:
     recorder = RunRecorder(run_dir)
     recorder.start(seed=seed, config=config)
@@ -85,8 +88,30 @@ async def run_replicate(
         agents = build_agents(config, seed)
         interventions = build_interventions(config)
         scheduler = Scheduler(len(agents), seed)
-        loop = Loop(agents, scheduler, interventions, recorder)
+
+        enabled = enabled_metrics(config, force=force_metrics)
+        runner = build_metric_runner(
+            config,
+            run_id=recorder.run_id,
+            seed=seed,
+            experiment=config.logging.experiment_name,
+            condition=config.logging.labels.get("condition"),
+            run_dir=run_dir,
+            enabled=enabled,
+        )
+        loop = Loop(
+            agents,
+            scheduler,
+            interventions,
+            recorder,
+            window_size=config.metrics.window_size if runner else None,
+            on_window=runner.on_window if runner else None,
+        )
+        if runner is not None:
+            recorder.set_meta(metrics_status="running")
         await loop.run(config.run.rounds)
+        if runner is not None:
+            recorder.set_meta(metrics_status=await runner.finalize())
     except BaseException as error:
         recorder.fail(error)
         raise
@@ -114,20 +139,35 @@ def _print_dry_run(config: RunConfig) -> None:
     for i, p in enumerate(config.agents.pool):
         print(f"  agent_{i}: {p.provider}/{p.model}")
     print(f"interventions: {[iv.type for iv in config.interventions] or 'none'}")
+    print(f"metrics: {config.metrics.enabled or 'none'}")
     print(f"out_dir: {config.logging.out_dir}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(prog="renewal", description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
+
     run_parser = subparsers.add_parser("run", help="Run one config file")
     run_parser.add_argument("config", type=Path, help="Run YAML file")
     run_parser.add_argument("--out", type=Path, default=None, help="Override out_dir")
     run_parser.add_argument("--seed", type=int, default=None, help="Override base seed")
     run_parser.add_argument("--debug", "-d", action="store_true", help="DEBUG logs + llm_calls.jsonl")
     run_parser.add_argument("--dry-run", action="store_true", help="Validate and print plan without running")
+    run_parser.add_argument("--metrics", action="store_true", help="Force metrics on (defaults to the Kong set when metrics.enabled is empty)")
+
+    analyze_parser = subparsers.add_parser("analyze", help="Compute cross_run_sim over a run directory tree")
+    analyze_parser.add_argument("experiment_dir", type=Path, help="Experiment directory of run dirs")
+    analyze_parser.add_argument("--condition", default=None, help="Only analyze runs with this condition label")
+
     args = parser.parse_args()
 
+    if args.command == "run":
+        _cmd_run(args)
+    elif args.command == "analyze":
+        _cmd_analyze(args)
+
+
+def _cmd_run(args) -> None:
     try:
         config = load_run_config(args.config)
     except (ValueError, KeyError, yaml.YAMLError, OSError) as exc:
@@ -160,11 +200,23 @@ def main() -> None:
         file_handler = attach_file_log(run_dir / "run.log", config.logging.file_level)
         try:
             summary = asyncio.run(
-                run_replicate(config, run_dir=run_dir, seed=seed, debug=args.debug)
+                run_replicate(
+                    config,
+                    run_dir=run_dir,
+                    seed=seed,
+                    debug=args.debug,
+                    force_metrics=args.metrics,
+                )
             )
             LOGGER.info("replicate %s: %s", replicate, summary)
         finally:
             detach_file_log(file_handler)
+
+
+def _cmd_analyze(args) -> None:
+    configure_logging(console_level="INFO")
+    out_path = run_analyze(args.experiment_dir, args.condition)
+    print(f"wrote {out_path}")
 
 
 if __name__ == "__main__":

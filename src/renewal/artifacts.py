@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import yaml
 
 from renewal.config import RunConfig, dump_run_config
@@ -30,6 +31,8 @@ EVENTS_FILENAME = "events.jsonl"
 META_FILENAME = "meta.json"
 SOURCE_CONFIG_FILENAME = "config.yaml"
 RESOLVED_CONFIG_FILENAME = "resolved_config.yaml"
+METRICS_FILENAME = "metrics.parquet"
+EMBEDDINGS_FILENAME = "embeddings.parquet"
 TIMESTAMP_FORMAT = "%Y%m%d_%H%M%S"
 
 
@@ -76,6 +79,9 @@ def _base_meta(config: RunConfig, seed: int, run_id: str) -> dict[str, Any]:
         "models": [p.model_dump(mode="json") for p in config.agents.pool],
         "experiment_name": config.logging.experiment_name,
         "labels": dict(config.logging.labels),
+        "metrics_enabled": list(config.metrics.enabled),
+        "embedding_model": config.metrics.embedding.model,
+        "metrics_status": "skipped",
         "status": "running",
         "started_at": _now(),
         "finished_at": None,
@@ -119,6 +125,11 @@ class RunRecorder:
             turn_index=message.turn_index,
             speaker=message.speaker,
         )
+
+    def set_meta(self, **fields: Any) -> None:
+        """Update one or more meta fields and persist immediately."""
+        self._meta.update(fields)
+        self._write_meta()
 
     def finish(self) -> None:
         self._meta["status"] = "completed"
@@ -202,3 +213,26 @@ def _write_yaml(path: Path, data: Mapping[str, Any]) -> None:
         yaml.safe_dump(dict(data), sort_keys=False, allow_unicode=True),
         encoding="utf-8",
     )
+
+
+def write_metrics_parquet(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Write long-format metric rows to parquet (no-op when empty)."""
+    if not rows:
+        return
+    df = pd.DataFrame(rows)
+    df["value"] = df["value"].astype("float64")
+    df["index"] = df["index"].astype("int64")
+    df["window_start_round"] = df["window_start_round"].astype("Int64")
+    df["window_end_round"] = df["window_end_round"].astype("Int64")
+    df.to_parquet(path, index=False)
+
+
+def write_embeddings_parquet(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Write per-window embedding vectors to parquet (no-op when empty)."""
+    if not rows:
+        return
+    df = pd.DataFrame(rows)
+    df["window_index"] = df["window_index"].astype("int64")
+    df["start_round"] = df["start_round"].astype("int64")
+    df["end_round"] = df["end_round"].astype("int64")
+    df.to_parquet(path, index=False)
