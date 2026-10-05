@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "renewal"
+version = "0.1.0"
+description = "Architecture of Renewal — closed-loop multi-agent semantic-collapse harness"
+authors = ["Luis Celiktemel"]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "renewal", from = "src" },
+]
+package-mode = true
+
+[tool.poetry.dependencies]
+python = ">=3.13,<4.0"
+openai = ">=2.4.0,<3.0.0"
+pydantic = ">=2.13.0"
+pyyaml = ">=6.0"
+python-dotenv = ">=1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4"
+pytest-asyncio = "^0.24"
+pytest-mock = "^3.15"
+
+[tool.poetry.scripts]
+renewal = "renewal.run:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[tool.black]
+line-length = 88

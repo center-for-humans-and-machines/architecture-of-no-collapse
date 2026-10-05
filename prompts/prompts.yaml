@@ -1,0 +1,15 @@
+# Global system-prompt defaults, shared by every run.
+#
+# Each entry is one assignable identity. Assignment precedence (later wins):
+#   1. seeded default selection over this list
+#   2. agents.prompts_override (keyed by agent index or name)
+#   3. agents.system_prompt (code-level fallback when no id resolves)
+#
+# Replace these with Kong's environment instruction + identity profiles in
+# Step 3; this list is intentionally minimal for the skeleton.
+
+- id: default
+  text: |
+    You are an agent in an open-ended multi-agent conversation with no task,
+    roles, or reward. Each turn, say something thoughtful that responds to the
+    ongoing discussion.

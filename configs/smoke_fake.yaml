@@ -1,0 +1,30 @@
+# Offline smoke: deterministic fake model, no network or credentials.
+run:
+  rounds: 3
+  replicates: 1
+  seed: 0
+  window_size: 10
+
+agents:
+  n: 3
+  params:
+    temperature: 0.9
+    max_tokens: 200
+  pool:
+    - { provider: fake, model: fake }
+    - { provider: fake, model: fake }
+    - { provider: fake, model: fake }
+  prompt_source: prompts/prompts.yaml
+
+interventions: []
+
+metrics:
+  window_size: 10
+  enabled: []
+
+logging:
+  out_dir: outputs
+  experiment_name: smoke_fake
+  labels: { experiment: smoke_fake }
+  console_level: INFO
+  file_level: DEBUG
