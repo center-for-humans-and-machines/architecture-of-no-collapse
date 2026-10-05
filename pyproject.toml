@@ -25,6 +25,11 @@ pytest = "^8.4"
 pytest-asyncio = "^0.24"
 pytest-mock = "^3.15"
 
+
+[tool.poetry.group.viewer.dependencies]
+fastapi = "^0.142.2"
+uvicorn = "^0.54.0"
+
 [tool.poetry.scripts]
 renewal = "renewal.run:main"
 
@@ -34,7 +39,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 asyncio_mode = "auto"
 
 [tool.black]

@@ -63,11 +63,21 @@ served with `--task embed`); force them on for a config with empty
 poetry run renewal run configs/smoke_vllm.yaml --metrics
 ```
 
+## Viewer
+
+A standalone web app (FastAPI + Svelte + Plotly) for browsing runs, reading
+conversations, and comparing metric timelines. See `viewer/README.md`.
+
+```bash
+poetry run uvicorn viewer.backend.main:app --reload --port 8000   # API
+cd viewer/frontend && npm install && npm run dev                  # UI
+```
+
 ## Tests
 
 ```bash
-poetry run pytest            # unit + offline smoke (no network)
-poetry run pytest tests/integration   # live vLLM run (needs .env endpoint)
+poetry run python -m pytest            # unit + offline smoke (no network)
+poetry run python -m pytest tests/integration   # live vLLM run (needs .env endpoint)
 ```
 
 The live integration test is skipped automatically when no vLLM endpoint is

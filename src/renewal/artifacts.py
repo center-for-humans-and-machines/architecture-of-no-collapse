@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import platform
 import subprocess
 import uuid
@@ -215,6 +216,18 @@ def _write_yaml(path: Path, data: Mapping[str, Any]) -> None:
     )
 
 
+def _write_parquet_atomic(path: Path, df: pd.DataFrame) -> None:
+    """Write a DataFrame to parquet atomically (temp file + rename).
+
+    A reader polling the file (e.g. the viewer) never sees a half-written
+    parquet, because the bytes land under a ``.tmp`` name and are swapped into
+    place with an atomic ``os.replace``.
+    """
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    df.to_parquet(tmp, index=False)
+    os.replace(tmp, path)
+
+
 def write_metrics_parquet(path: Path, rows: list[dict[str, Any]]) -> None:
     """Write long-format metric rows to parquet (no-op when empty)."""
     if not rows:
@@ -224,7 +237,7 @@ def write_metrics_parquet(path: Path, rows: list[dict[str, Any]]) -> None:
     df["index"] = df["index"].astype("int64")
     df["window_start_round"] = df["window_start_round"].astype("Int64")
     df["window_end_round"] = df["window_end_round"].astype("Int64")
-    df.to_parquet(path, index=False)
+    _write_parquet_atomic(path, df)
 
 
 def write_embeddings_parquet(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -235,4 +248,4 @@ def write_embeddings_parquet(path: Path, rows: list[dict[str, Any]]) -> None:
     df["window_index"] = df["window_index"].astype("int64")
     df["start_round"] = df["start_round"].astype("int64")
     df["end_round"] = df["end_round"].astype("int64")
-    df.to_parquet(path, index=False)
+    _write_parquet_atomic(path, df)
