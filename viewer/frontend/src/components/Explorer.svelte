@@ -2,7 +2,7 @@
   import Filters from './Filters.svelte';
   import RunTable from './RunTable.svelte';
 
-  let { runs, facets, filters, selected, onfilters, ontoggle, onopen } = $props();
+  let { runs, facets, filters, selected, onfilters, ontoggle, ontoggleall, onopen } = $props();
 </script>
 
 <div class="layout">
@@ -10,7 +10,7 @@
     <Filters {facets} {filters} onchange={onfilters} />
   </aside>
   <section>
-    <RunTable {runs} {selected} onopen={onopen} ontoggle={ontoggle} />
+    <RunTable {runs} {selected} onopen={onopen} ontoggle={ontoggle} {ontoggleall} />
   </section>
 </div>
 

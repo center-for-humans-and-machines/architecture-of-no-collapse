@@ -2,9 +2,8 @@
   import { api } from '../lib/api.js';
   import Conversation from './Conversation.svelte';
   import MetricsTable from './MetricsTable.svelte';
-  import Timeline from './Timeline.svelte';
 
-  let { runId, comparisonIds = [] } = $props();
+  let { runId } = $props();
 
   let tab = $state('conversation');
   let transcript = $state([]);
@@ -24,7 +23,7 @@
     return () => clearInterval(id);
   });
 
-  const tabs = ['conversation', 'metrics', 'timeline'];
+  const tabs = ['conversation', 'metrics'];
 </script>
 
 <div class="detail">
@@ -45,8 +44,6 @@
     <Conversation messages={transcript} />
   {:else if tab === 'metrics'}
     <MetricsTable {metrics} />
-  {:else}
-    <Timeline runIds={comparisonIds} />
   {/if}
 </div>
 

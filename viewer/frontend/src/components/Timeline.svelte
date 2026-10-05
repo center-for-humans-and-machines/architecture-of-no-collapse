@@ -47,7 +47,9 @@
 </script>
 
 <div class="timeline">
-  {#if metrics.length === 0}
+  {#if runIds.length === 0}
+    <p class="muted">Select runs in the Runs tab to compare their timelines.</p>
+  {:else if metrics.length === 0}
     <p class="muted">No metrics for the selected run(s).</p>
   {:else}
     {#each metrics as m (m.metric)}

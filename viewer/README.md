@@ -40,15 +40,21 @@ RENEWAL_OUTPUTS=/path/to/outputs poetry run uvicorn viewer.backend.main:app --po
 
 ## Pages
 
-1. **Explorer** — filter by models involved, rounds, temperature, max tokens,
+The main view has two tabs: **Runs** and **Timeline**.
+
+1. **Runs** — filter by models involved, rounds, temperature, max tokens,
    window size, and start time; the run table updates live (status flips from
-   `running` to `completed`). Check boxes to select runs for comparison; click a
-   run id to open it.
-2. **Conversation** — the full transcript in order, one message per block, with
-   `intervention` blocks inset in orange.
-3. **Metrics table** — one row per window, one column per metric.
-4. **Timeline** — the selected runs overlaid, one chart per metric (x = window
+   `running` to `completed`). Check boxes to select runs for comparison, use the
+   header checkbox to select or clear all visible runs at once, or click a run
+   id to open it.
+2. **Timeline** — every selected run overlaid, one chart per metric (x = window
    index); extends live as a running run writes more windows.
+
+Opening a run shows the single-run view, which has its own tabs:
+
+1. **Conversation** — the full transcript in order, one message per block, with
+   `intervention` blocks inset in orange.
+2. **Metrics table** — one row per window, one column per metric.
 
 ## Production
 

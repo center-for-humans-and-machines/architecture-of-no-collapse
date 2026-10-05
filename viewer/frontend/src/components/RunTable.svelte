@@ -1,7 +1,14 @@
 <script>
   import { shortId } from '../lib/api.js';
 
-  let { runs = [], selected = [], onopen, ontoggle } = $props();
+  let { runs = [], selected = [], onopen, ontoggle, ontoggleall } = $props();
+
+  let allVisibleSelected = $derived(
+    runs.length > 0 && runs.every((r) => selected.includes(r.run_id))
+  );
+  let someVisibleSelected = $derived(
+    !allVisibleSelected && runs.some((r) => selected.includes(r.run_id))
+  );
 
   function models(run) {
     return (run.models || []).map((m) => m.model).join(', ');
@@ -15,7 +22,17 @@
 <table>
   <thead>
     <tr>
-      <th></th>
+      <th>
+        {#if runs.length}
+          <input
+            type="checkbox"
+            checked={allVisibleSelected}
+            bind:indeterminate={someVisibleSelected}
+            title="Select all visible runs"
+            onchange={() => ontoggleall(runs.map((r) => r.run_id))}
+          />
+        {/if}
+      </th>
       <th>run</th>
       <th>experiment</th>
       <th>seed</th>
