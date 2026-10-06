@@ -18,6 +18,7 @@ from renewal.interventions.scaffolder.policy import Action, EscalationPolicy
 from renewal.interventions.scaffolder.search import SearchClient, TavilySearchClient
 from renewal.interventions.scaffolder.signals import AdjacentSimilaritySignal
 from renewal.interventions.scaffolder.topics import (
+    Topic,
     TopicInfuser,
     TopicUnavailable,
 )
@@ -33,6 +34,32 @@ _INJECT_FALLBACK = (
     "It is time for a topic switch. Introduce a new topic with one clear "
     "connection to the current discussion."
 )
+
+_OPENING_FALLBACK = (
+    "Start the conversation by introducing one interesting, concrete topic "
+    "and giving one informative observation about it."
+)
+
+
+def _topic_content(topic: Topic, *, opening: bool) -> str:
+    """Compose the steering text for a grounded topic.
+
+    An ``opening`` topic seeds a conversation that has not started yet, so it
+    asks the model to begin; a mid-conversation injection asks it to connect the
+    new topic to what came before.
+    """
+    title = topic.title or "new topic"
+    if opening:
+        return (
+            f'Opening topic: "{title}" — {topic.excerpt} '
+            f"(source: {topic.url}). Start the conversation from this topic "
+            "and open with one informative observation about it."
+        )
+    return (
+        f'New topic: "{title}" — {topic.excerpt} '
+        f"(source: {topic.url}). Connect it to the current conversation "
+        "and give one informative observation."
+    )
 
 
 def _build_embedder(embedding: dict | None) -> EmbeddingClient:
@@ -63,6 +90,7 @@ class ScaffolderIntervention:
         *,
         threshold: float = 0.85,
         visibility: Visibility = "all",
+        open_with_topic: bool = True,
         seed: int = 0,
         embedding: dict | None = None,
         num_words: int = 3,
@@ -81,6 +109,7 @@ class ScaffolderIntervention:
         self.visibility = visibility
         if visibility not in ("all", "injections", "transient"):
             raise ValueError(f"unknown visibility {visibility!r}")
+        self.open_with_topic = open_with_topic
 
         self._policy = EscalationPolicy(threshold=threshold)
         self._signal = AdjacentSimilaritySignal(embedder or _build_embedder(embedding))
@@ -131,6 +160,25 @@ class ScaffolderIntervention:
             transient=self._is_transient(action),
         )
 
+    async def prime(self) -> Message | None:
+        """Inject a grounded starting topic before turn 0, if enabled."""
+        if not self.open_with_topic:
+            return None
+        content, provenance = await self._injection_content(opening=True)
+        return Message(
+            role="intervention",
+            speaker=self.name,
+            content=content,
+            turn_index=-1,
+            meta={
+                "level": Action.INJECT.value,
+                "threshold": self.threshold,
+                "opening": True,
+                **provenance,
+            },
+            transient=self._is_transient(Action.INJECT),
+        )
+
     def _is_transient(self, action: Action) -> bool:
         if self.visibility == "transient":
             return True
@@ -138,18 +186,13 @@ class ScaffolderIntervention:
             return action != Action.INJECT
         return False
 
-    async def _injection_content(self) -> tuple[str, dict]:
+    async def _injection_content(self, *, opening: bool = False) -> tuple[str, dict]:
+        fallback = _OPENING_FALLBACK if opening else _INJECT_FALLBACK
         try:
             topic = await self._infuser.inject()
         except TopicUnavailable as exc:
             LOGGER.warning("topic injection failed, falling back: %s", exc)
-            return _INJECT_FALLBACK, {"fallback_reason": str(exc)}
-        title = topic.title or "new topic"
-        content = (
-            f'New topic: "{title}" — {topic.excerpt} '
-            f"(source: {topic.url}). Connect it to the current conversation "
-            "and give one informative observation."
-        )
+            return fallback, {"fallback_reason": str(exc)}
         provenance = {
             "words": list(topic.words),
             "query": topic.query,
@@ -157,4 +200,4 @@ class ScaffolderIntervention:
             "source_title": topic.title,
             "source_score": topic.score,
         }
-        return content, provenance
+        return _topic_content(topic, opening=opening), provenance

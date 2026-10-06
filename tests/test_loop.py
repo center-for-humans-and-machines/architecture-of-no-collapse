@@ -110,3 +110,147 @@ async def test_prompt_includes_system_and_history():
 
     assert captured["roles"][0] == "system"
     assert captured["speakers"][0] == "system"
+
+
+class PrimeIntervention:
+    name = "prime"
+
+    async def prime(self):
+        return Message("intervention", "prime", "opening", -1)
+
+    async def act(self, messages):
+        return None
+
+
+class TransientPrimeIntervention:
+    name = "prime"
+
+    async def prime(self):
+        return Message("intervention", "prime", "opening", -1, transient=True)
+
+    async def act(self, messages):
+        return None
+
+
+async def test_prime_hook_seeds_before_first_turn():
+    captured = {}
+
+    class CapturingLLM(FakeLLM):
+        async def generate(self, messages, params):
+            captured.setdefault("first", [m.content for m in messages])
+            return "ok"
+
+    agent = Agent(name="agent_0", llm=CapturingLLM(), system_prompt="SYS", params={})
+    recorder = NullRecorder()
+    loop = Loop([agent], Scheduler(1, 0), [PrimeIntervention()], recorder)
+    await loop.run(3)
+
+    # The opening is in canonical history before the first agent turn...
+    assert loop.history[0].role == "intervention"
+    assert loop.history[0].content == "opening"
+    assert loop.history[0].turn_index == -1
+    # ...reached the very first prompt...
+    assert "opening" in captured["first"]
+    # ...and was primed exactly once, regardless of the number of rounds.
+    assert len(recorder.interventions) == 1
+
+
+async def test_transient_prime_reaches_first_prompt_then_drops():
+    captured = {}
+
+    class CapturingLLM(FakeLLM):
+        async def generate(self, messages, params):
+            captured.setdefault("first", [m.content for m in messages])
+            return "ok"
+
+    agent = Agent(name="agent_0", llm=CapturingLLM(), system_prompt="SYS", params={})
+    recorder = NullRecorder()
+    loop = Loop([agent], Scheduler(1, 0), [TransientPrimeIntervention()], recorder)
+    await loop.run(2)
+
+    assert "opening" in captured["first"]
+    # A transient opening is prompt-scoped: it never enters canonical history.
+    assert all(m.role == "assistant" for m in loop.history)
+    assert len(recorder.interventions) == 1
+
+
+async def test_interventions_without_prime_are_skipped():
+    agents = _agents(2)
+    recorder = NullRecorder()
+    loop = Loop(agents, Scheduler(2, 0), [AppendIntervention()], recorder)
+    await loop.run(1)
+
+    # No prime hook: the loop runs normally (2 turns + 2 post-turn notes).
+    assert len(loop.history) == 4
+    assert len(recorder.turns) == 2
+
+
+class CountingLLM(FakeLLM):
+    """Return a distinguishable body per turn and record each prompt."""
+
+    def __init__(self):
+        super().__init__()
+        self.prompts = []
+
+    async def generate(self, messages, params):
+        self.prompts.append([m.content for m in messages])
+        return f"turn{len(self.prompts) - 1}"
+
+
+async def test_memory_truncates_prompt_context():
+    llm = CountingLLM()
+    agent = Agent(name="agent_0", llm=llm, system_prompt="SYS", params={})
+    loop = Loop([agent], Scheduler(1, 0), [], NullRecorder(), memory_turns=2)
+    await loop.run(4)
+
+    # Turn 3's prompt remembers only the last two turns (turn1, turn2)...
+    assert llm.prompts[3] == ["SYS", "turn1", "turn2"]
+    # ...while the canonical history still holds every turn.
+    assert [m.content for m in loop.history] == [
+        "turn0",
+        "turn1",
+        "turn2",
+        "turn3",
+    ]
+
+
+async def test_memory_none_keeps_full_history_in_prompt():
+    llm = CountingLLM()
+    agent = Agent(name="agent_0", llm=llm, system_prompt="SYS", params={})
+    loop = Loop([agent], Scheduler(1, 0), [], NullRecorder(), memory_turns=None)
+    await loop.run(3)
+
+    assert llm.prompts[2] == ["SYS", "turn0", "turn1"]
+
+
+class TagIntervention:
+    name = "tag"
+
+    async def prime(self):
+        return None
+
+    async def act(self, messages):
+        latest = [m for m in messages if m.role == "assistant"][-1]
+        return Message(
+            "intervention",
+            "tag",
+            f"tag{latest.turn_index}",
+            latest.turn_index,
+        )
+
+
+async def test_memory_keeps_interventions_of_retained_turns():
+    llm = CountingLLM()
+    agent = Agent(name="agent_0", llm=llm, system_prompt="SYS", params={})
+    loop = Loop(
+        [agent],
+        Scheduler(1, 0),
+        [TagIntervention()],
+        NullRecorder(),
+        memory_turns=1,
+    )
+    await loop.run(3)
+
+    # Turn 2 keeps only the latest agent turn and its attached intervention;
+    # the earlier turn's tag (turn_index 0) is forgotten.
+    assert llm.prompts[2] == ["SYS", "turn1", "tag1"]

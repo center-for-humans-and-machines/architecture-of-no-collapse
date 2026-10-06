@@ -24,6 +24,7 @@ from renewal.interventions.random_scaffolder.search import (
     TavilySearchClient,
 )
 from renewal.interventions.random_scaffolder.topics import (
+    Topic,
     TopicInfuser,
     TopicUnavailable,
 )
@@ -42,7 +43,33 @@ _INJECT_FALLBACK = (
     "connection to the current discussion."
 )
 
+_OPENING_FALLBACK = (
+    "Start the conversation by introducing one interesting, concrete topic "
+    "and giving one informative observation about it."
+)
+
 DEFAULT_PROBABILITIES = Distribution(deepen=0.8, innovate=0.15, inject=0.05)
+
+
+def _topic_content(topic: Topic, *, opening: bool) -> str:
+    """Compose the steering text for a grounded topic.
+
+    An ``opening`` topic seeds a conversation that has not started yet, so it
+    asks the model to begin; a mid-conversation injection asks it to connect the
+    new topic to what came before.
+    """
+    title = topic.title or "new topic"
+    if opening:
+        return (
+            f'Opening topic: "{title}" — {topic.excerpt} '
+            f"(source: {topic.url}). Start the conversation from this topic "
+            "and open with one informative observation about it."
+        )
+    return (
+        f'New topic: "{title}" — {topic.excerpt} '
+        f"(source: {topic.url}). Connect it to the current conversation "
+        "and give one informative observation."
+    )
 
 
 def _as_distribution(probabilities: Distribution | dict | None) -> Distribution:
@@ -83,6 +110,7 @@ class RandomScaffolderIntervention:
         *,
         probabilities: Distribution | dict | None = None,
         visibility: Visibility = "all",
+        open_with_topic: bool = True,
         seed: int = 0,
         num_words: int = 3,
         search_top_k: int = 3,
@@ -98,6 +126,7 @@ class RandomScaffolderIntervention:
         self.visibility = visibility
         if visibility not in ("all", "injections", "transient"):
             raise ValueError(f"unknown visibility {visibility!r}")
+        self.open_with_topic = open_with_topic
 
         self.distribution = _as_distribution(probabilities)
         self._policy = RandomPolicy(
@@ -150,6 +179,28 @@ class RandomScaffolderIntervention:
             transient=self._is_transient(action),
         )
 
+    async def prime(self) -> Message | None:
+        """Inject a grounded starting topic before turn 0, if enabled.
+
+        The opening is not selected by a random draw, so it records no
+        ``probabilities`` or ``draw``; it is always an INJECT-level message.
+        """
+        if not self.open_with_topic:
+            return None
+        content, provenance = await self._injection_content(opening=True)
+        return Message(
+            role="intervention",
+            speaker=self.name,
+            content=content,
+            turn_index=-1,
+            meta={
+                "level": Action.INJECT.value,
+                "opening": True,
+                **provenance,
+            },
+            transient=self._is_transient(Action.INJECT),
+        )
+
     def _is_transient(self, action: Action) -> bool:
         if self.visibility == "transient":
             return True
@@ -157,18 +208,13 @@ class RandomScaffolderIntervention:
             return action != Action.INJECT
         return False
 
-    async def _injection_content(self) -> tuple[str, dict]:
+    async def _injection_content(self, *, opening: bool = False) -> tuple[str, dict]:
+        fallback = _OPENING_FALLBACK if opening else _INJECT_FALLBACK
         try:
             topic = await self._infuser.inject()
         except TopicUnavailable as exc:
             LOGGER.warning("topic injection failed, falling back: %s", exc)
-            return _INJECT_FALLBACK, {"fallback_reason": str(exc)}
-        title = topic.title or "new topic"
-        content = (
-            f'New topic: "{title}" — {topic.excerpt} '
-            f"(source: {topic.url}). Connect it to the current conversation "
-            "and give one informative observation."
-        )
+            return fallback, {"fallback_reason": str(exc)}
         provenance = {
             "words": list(topic.words),
             "query": topic.query,
@@ -176,4 +222,4 @@ class RandomScaffolderIntervention:
             "source_title": topic.title,
             "source_score": topic.score,
         }
-        return content, provenance
+        return _topic_content(topic, opening=opening), provenance

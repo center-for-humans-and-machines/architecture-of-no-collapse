@@ -25,10 +25,24 @@ def test_defaults():
     assert config.run.seed == 0
     assert config.run.window_size == 10
     assert config.run.replicates == 1
+    assert config.run.memory_turns == 20
     assert config.agents.params.temperature == 0.9
     assert config.agents.params.max_tokens == 200
     assert config.metrics.enabled == []
     assert config.interventions == []
+
+
+def test_memory_turns_null_disables_forgetting():
+    data = _base()
+    data["run"] = {"memory_turns": None}
+    assert RunConfig.model_validate(data).run.memory_turns is None
+
+
+def test_memory_turns_rejects_zero():
+    data = _base()
+    data["run"] = {"memory_turns": 0}
+    with pytest.raises(ValidationError):
+        RunConfig.model_validate(data)
 
 
 def test_unknown_top_level_key_rejected():

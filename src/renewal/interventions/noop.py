@@ -12,3 +12,6 @@ class NoopIntervention:
 
     async def act(self, messages: list[Message]) -> Message | None:
         return None
+
+    async def prime(self) -> Message | None:
+        return None

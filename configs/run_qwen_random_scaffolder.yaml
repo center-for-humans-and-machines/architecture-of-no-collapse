@@ -5,14 +5,15 @@
 run:
   rounds: 100
   replicates: 1
-  seed: 43
+  seed: 5865
   window_size: 10
+  memory_turns: 5
 
 agents:
   n: 1
   params:
     temperature: 0.9
-    max_tokens: 200
+    max_tokens: 500
   pool:
     - { provider: vllm, model: Qwen/Qwen3-30B-A3B-Instruct-2507 }
   prompt_source: prompts/prompts.yaml
@@ -21,10 +22,12 @@ interventions:
   - type: random_scaffolder
     options:
       probabilities:
-        deepen: 0.65
-        innovate: 0.25
+        deepen: 0.50
+        innovate: 0.40
         inject: 0.10
-      visibility: all
+      visibility: injections
+      # Inject a grounded starting topic before turn 0 (uses Tavily + GloVe).
+      open_with_topic: true
 
 metrics:
   window_size: 10

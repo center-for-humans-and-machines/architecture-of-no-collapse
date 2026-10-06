@@ -40,6 +40,9 @@ class RunSettings(BaseModel):
     replicates: int = Field(default=1, ge=1)
     seed: int = 0
     window_size: int = Field(default=10, ge=1)
+    # Agents see only the last ``memory_turns`` agent turns in their prompt.
+    # ``None`` disables forgetting (agents see the full history).
+    memory_turns: int | None = Field(default=20, ge=1)
 
 
 class GenerationParams(BaseModel):

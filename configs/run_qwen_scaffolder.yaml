@@ -7,6 +7,7 @@ run:
   replicates: 1
   seed: 42
   window_size: 10
+  memory_turns: 20
 
 agents:
   n: 1
@@ -22,6 +23,8 @@ interventions:
     options:
       threshold: 0.7
       visibility: all
+      # Inject a grounded starting topic before turn 0 (uses Tavily + GloVe).
+      open_with_topic: true
       seed: 67
       embedding: { provider: vllm, model: Qwen/Qwen3-Embedding-8B }
 

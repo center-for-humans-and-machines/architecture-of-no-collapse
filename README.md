@@ -41,6 +41,15 @@ Outputs land in `outputs/<experiment>/<timestamp>_seed<N>/` with
 `metrics.parquet` (long-format measures) and `embeddings.parquet` (per-window
 vectors).
 
+### Memory (forgetting)
+
+Agents need not see the whole conversation. `run.memory_turns` (default `20`)
+limits each agent's prompt to the most recent N agent turns, together with any
+intervention/steering messages attached to those turns; older turns scroll out
+of view. The canonical `transcript.jsonl`, `events.jsonl`, and metrics always
+keep the full conversation — forgetting affects only the live prompt. Set
+`memory_turns: null` to disable forgetting and show agents the entire history.
+
 ## Metrics
 
 Offline smoke (fake LLM + fake embedding, all four metrics):
@@ -77,6 +86,14 @@ the previous turn; higher = more repetition = more collapse):
 
 Every message records its `level`, `signal`, `threshold`, and (for `inject`)
 the sampled `words`, `query`, `source_url`, and `source_title` in `meta`.
+
+Before turn 0 the scaffolder injects a grounded **opening topic** (the same
+GloVe → Tavily pipeline) so the first agent responds to a concrete starting
+point instead of generating from an empty history. The opening is tagged
+`meta.opening: true` with `turn_index: -1`, honors `visibility` like any other
+message, and falls back to a generic opening prompt if the topic pipeline fails.
+Disable it with `open_with_topic: false` (the offline smoke configs do, to stay
+network-free).
 
 `visibility` controls whether steering messages persist in history:
 
@@ -120,6 +137,11 @@ keeps the same meaning as above (`all` / `injections` / `transient`). Each
 message records its `level`, the `probabilities` used, and the uniform `draw`
 that selected the action (plus the sampled `words`, `query`, `source_url`, and
 `source_title` for `inject`).
+
+Like the scaffolder above, the random scaffolder injects a grounded **opening
+topic** before turn 0 (`open_with_topic`, default true; `meta.opening: true`,
+`turn_index: -1`). This opening is not produced by a random draw, so it records
+no `probabilities` or `draw`.
 
 Offline smoke (fake LLM, inject disabled so no Tavily or word-vector download):
 

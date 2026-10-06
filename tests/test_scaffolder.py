@@ -225,6 +225,54 @@ async def test_intervention_no_assistant_is_noop():
     assert await iv.act([]) is None
 
 
+async def test_intervention_prime_injects_opening_topic():
+    iv = _intervention()
+    message = await iv.prime()
+    assert message is not None
+    assert message.role == "intervention"
+    assert message.meta["level"] == "inject"
+    assert message.meta["opening"] is True
+    assert message.meta["source_url"] == "https://example.com/m"
+    assert message.turn_index == -1
+    assert message.transient is False
+    assert message.content.startswith("Opening topic:")
+    assert "Start the conversation" in message.content
+
+
+async def test_intervention_prime_disabled_is_noop():
+    iv = ScaffolderIntervention(
+        open_with_topic=False,
+        embedder=FakeEmbedding(dim=64),
+        sampler=_FakeSampler(),
+        search_client=_FakeSearch(),
+    )
+    assert await iv.prime() is None
+
+
+async def test_intervention_prime_falls_back_on_search_failure():
+    class _BrokenSearch:
+        async def search(self, query, top_k):
+            raise RuntimeError("boom")
+
+    iv = _intervention(search=_BrokenSearch())
+    message = await iv.prime()
+    assert message.meta["opening"] is True
+    assert "fallback_reason" in message.meta
+    assert "Start the conversation" in message.content
+
+
+async def test_intervention_prime_honors_transient_visibility():
+    iv = _intervention(visibility="transient")
+    message = await iv.prime()
+    assert message.transient is True
+
+
+async def test_intervention_prime_persists_under_injections_visibility():
+    iv = _intervention(visibility="injections")
+    message = await iv.prime()
+    assert message.transient is False
+
+
 async def test_intervention_inject_falls_back_on_search_failure():
     class _BrokenSearch:
         async def search(self, query, top_k):

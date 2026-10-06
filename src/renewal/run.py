@@ -115,6 +115,7 @@ async def run_replicate(
             recorder,
             window_size=config.metrics.window_size if runner else None,
             on_window=runner.on_window if runner else None,
+            memory_turns=config.run.memory_turns,
         )
         if runner is not None:
             recorder.set_meta(metrics_status="running")
@@ -144,6 +145,8 @@ def _print_dry_run(config: RunConfig) -> None:
         f"rounds: {config.run.rounds}  replicates: {config.run.replicates}  "
         f"seed: {config.run.seed}"
     )
+    memory = "unlimited" if config.run.memory_turns is None else config.run.memory_turns
+    print(f"memory_turns: {memory}")
     print(f"agents (n={config.agents.n}):")
     for i, p in enumerate(config.agents.pool):
         print(f"  agent_{i}: {p.provider}/{p.model}")
