@@ -9,8 +9,8 @@ from renewal.interventions.scaffolder import (
     DEEPEN_PROMPTS,
     INNOVATE_PROMPTS,
     Action,
+    CommonWordSampler,
     EscalationPolicy,
-    GloVeWordSampler,
     ScaffolderIntervention,
     SearchResult,
     TopicInfuser,
@@ -73,38 +73,28 @@ async def test_signal_first_turn_is_none_then_cosine():
 # --- word sampler ----------------------------------------------------------
 
 
-def _write_vectors(tmp_path, *, header=True):
-    lines = []
-    if header:
-        lines.append("3 2")
-    lines += [
-        "apple 1.0 0.0",
-        "banana 0.0 1.0",
-        "cherry 0.6 0.8",
-    ]
-    path = tmp_path / "tiny_glove.txt"
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return path
-
-
-def test_glove_sampler_returns_known_words(tmp_path):
-    sampler = GloVeWordSampler(model_path=str(_write_vectors(tmp_path)), seed=0)
+def test_common_word_sampler_returns_distinct_words():
+    sampler = CommonWordSampler(seed=0)
     words = sampler.sample(3)
     assert len(words) == 3
-    assert set(words) <= {"apple", "banana", "cherry"}
+    assert len(set(words)) == 3
+    assert all(word.isalpha() for word in words)
 
 
-def test_glove_sampler_headerless(tmp_path):
-    path = _write_vectors(tmp_path, header=False)
-    sampler = GloVeWordSampler(model_path=str(path), seed=0)
-    assert len(sampler.sample(2)) == 2
-
-
-def test_glove_sampler_deterministic(tmp_path):
-    path = _write_vectors(tmp_path)
-    a = GloVeWordSampler(model_path=str(path), seed=1).sample(5)
-    b = GloVeWordSampler(model_path=str(path), seed=1).sample(5)
+def test_common_word_sampler_is_deterministic():
+    a = CommonWordSampler(seed=1).sample(5)
+    b = CommonWordSampler(seed=1).sample(5)
     assert a == b
+
+
+def test_common_word_sampler_uses_injected_words():
+    sampler = CommonWordSampler(seed=0, words=["apple", "banana", "cherry"])
+    assert set(sampler.sample(3)) == {"apple", "banana", "cherry"}
+
+
+def test_common_word_sampler_rejects_bad_count():
+    with pytest.raises(ValueError):
+        CommonWordSampler(seed=0).sample(0)
 
 
 # --- topic infuser ---------------------------------------------------------
@@ -161,6 +151,69 @@ async def test_infuser_raises_when_no_results():
         await infuser.inject()
 
 
+def _long_search(content):
+    return _FakeSearch(
+        {
+            "mars terraforming colony": [
+                SearchResult("Title", "https://example.com/x", content, 0.9)
+            ]
+        }
+    )
+
+
+async def test_infuser_returns_full_excerpt_by_default():
+    content = "y" * 1000
+    infuser = TopicInfuser(_FakeSampler(), _long_search(content), num_words=3)
+    topic = await infuser.inject()
+    assert topic.excerpt == content
+
+
+async def test_infuser_truncates_excerpt_when_configured():
+    content = "y" * 1000
+    infuser = TopicInfuser(
+        _FakeSampler(), _long_search(content), num_words=3, max_excerpt_chars=10
+    )
+    topic = await infuser.inject()
+    assert topic.excerpt == "y" * 10
+
+
+async def test_infuser_prefers_raw_content_over_snippet():
+    client = _FakeSearch(
+        {
+            "mars terraforming colony": [
+                SearchResult(
+                    "Title",
+                    "https://example.com/x",
+                    "short snippet",
+                    0.9,
+                    raw_content="A much longer full page body.",
+                )
+            ]
+        }
+    )
+    infuser = TopicInfuser(_FakeSampler(), client, num_words=3)
+    topic = await infuser.inject()
+    assert topic.excerpt == "A much longer full page body."
+
+
+async def test_infuser_truncates_at_sentence_boundary():
+    text = "First sentence here. Second sentence here. Third sentence here."
+    infuser = TopicInfuser(
+        _FakeSampler(), _long_search(text), num_words=3, max_excerpt_chars=30
+    )
+    topic = await infuser.inject()
+    assert topic.excerpt == "First sentence here."
+
+
+async def test_infuser_truncates_at_word_boundary_without_sentence():
+    text = "one two three four five six seven"
+    infuser = TopicInfuser(
+        _FakeSampler(), _long_search(text), num_words=3, max_excerpt_chars=10
+    )
+    topic = await infuser.inject()
+    assert topic.excerpt == "one two"
+
+
 # --- intervention ----------------------------------------------------------
 
 
@@ -199,7 +252,10 @@ async def test_intervention_deepen_then_innovate_then_inject():
     )
     assert m3.meta["level"] == "inject"
     assert "source_url" in m3.meta and m3.meta["source_url"] == "https://example.com/m"
-    assert "Mars" in m3.content
+    # The excerpt is surfaced; the title and source URL are not.
+    assert "content" in m3.content
+    assert "Mars" not in m3.content
+    assert "example.com" not in m3.content
 
 
 async def test_intervention_visibility_injections():

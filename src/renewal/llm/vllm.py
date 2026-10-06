@@ -77,9 +77,10 @@ def _resolve_api_key(endpoint: str | None, explicit: str | None) -> str:
 
 def _to_openai(message: Message) -> dict[str, str]:
     # OpenAI-compatible APIs have no "intervention" role; interventions are
-    # surfaced as user turns tagged with the source speaker.
+    # surfaced as plain user turns (the speaker is kept on the Message for the
+    # transcript, but is not injected into the prompt).
     if message.role == "intervention":
-        return {"role": "user", "content": f"[{message.speaker}] {message.content}"}
+        return {"role": "user", "content": message.content}
     return {"role": message.role, "content": message.content}
 
 

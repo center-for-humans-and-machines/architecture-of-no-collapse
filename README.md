@@ -82,18 +82,24 @@ the previous turn; higher = more repetition = more collapse):
 | --- | --- | --- |
 | `deepen` | adjacent sim `< threshold` | rotate: "Add one concrete detail.", "Give one specific example.", "Develop one consequence.", "Name one edge case." |
 | `innovate` | adjacent sim `>= threshold` (first time) | rotate: "Introduce a genuinely new idea…", "Take this topic in an unexpected…", "Add a new concept…", "Find a non-obvious neighboring idea…" |
-| `inject` | adjacent sim `>= threshold` again | sample 3 GloVe words → Tavily search → surface the top hit as a new topic |
+| `inject` | adjacent sim `>= threshold` again | sample 3 common words → Tavily search → surface the top hit's text as a new topic |
 
 Every message records its `level`, `signal`, `threshold`, and (for `inject`)
-the sampled `words`, `query`, `source_url`, and `source_title` in `meta`.
+the sampled `words`, `query`, `source_url`, and `source_title` in `meta`. The
+visible injection text contains only the search excerpt and the instruction —
+the source title and URL are kept in `meta` but not shown to the model. The
+excerpt is Tavily's full parsed page text (`raw_content`), preferred over its
+short snippet; set `max_excerpt_chars` to cap it (the default `null` uses the
+full text). When a cap applies, the text is trimmed back to the last sentence
+boundary so it never cuts mid-sentence.
 
 Before turn 0 the scaffolder injects a grounded **opening topic** (the same
-GloVe → Tavily pipeline) so the first agent responds to a concrete starting
-point instead of generating from an empty history. The opening is tagged
-`meta.opening: true` with `turn_index: -1`, honors `visibility` like any other
-message, and falls back to a generic opening prompt if the topic pipeline fails.
-Disable it with `open_with_topic: false` (the offline smoke configs do, to stay
-network-free).
+common-word → Tavily pipeline) so the first agent responds to a concrete
+starting point instead of generating from an empty history. The opening is
+tagged `meta.opening: true` with `turn_index: -1`, honors `visibility` like any
+other message, and falls back to a generic opening prompt if the topic pipeline
+fails. Disable it with `open_with_topic: false` (the offline smoke configs do,
+to stay network-free).
 
 `visibility` controls whether steering messages persist in history:
 
@@ -102,15 +108,16 @@ network-free).
   prompt-scoped and dropped after the next turn.
 - `transient` — all steering messages are prompt-scoped.
 
-Offline smoke (fake LLM + fake embedding, no Tavily, no word-vector download):
+Offline smoke (fake LLM + fake embedding, no Tavily):
 
 ```bash
 poetry run renewal run configs/scaffolder_smoke.yaml
 ```
 
 A live run sets `embedding: { provider: vllm, model: Qwen/Qwen3-Embedding-8B }`
-and requires `TAVILY_API_KEY` (used only when a level-3 injection fires) plus
-the GloVe word vectors, downloaded and cached on first use.
+and requires `TAVILY_API_KEY` (used only when a level-3 injection fires). Topic
+seed words are sampled from a bundled list of the 20,000 most common English
+words — no vector download.
 
 ### Random scaffolder
 
@@ -143,14 +150,14 @@ topic** before turn 0 (`open_with_topic`, default true; `meta.opening: true`,
 `turn_index: -1`). This opening is not produced by a random draw, so it records
 no `probabilities` or `draw`.
 
-Offline smoke (fake LLM, inject disabled so no Tavily or word-vector download):
+Offline smoke (fake LLM, inject disabled so no Tavily call):
 
 ```bash
 poetry run renewal run configs/random_scaffolder_smoke.yaml
 ```
 
 A live run is `configs/run_qwen_random_scaffolder.yaml`, which sets
-`inject: 0.05` and uses the same Tavily + GloVe injection path as the scaffolder.
+`inject: 0.05` and uses the same Tavily injection path as the scaffolder.
 
 ## Viewer
 

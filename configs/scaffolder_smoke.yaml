@@ -1,7 +1,6 @@
 # Offline scaffolder smoke: fake LLM + fake embedding, no network or keys.
 # Level-3 injection never fires here (the fake model keeps adjacent similarity
-# below the threshold) and the opening topic is off, so no Tavily call and no
-# word-vector download.
+# below the threshold) and the opening topic is off, so no Tavily call.
 run:
   rounds: 30
   replicates: 1
@@ -25,7 +24,7 @@ interventions:
     options:
       threshold: 0.85
       visibility: all
-      # Keep the smoke offline: priming would sample GloVe words and search.
+      # Keep the smoke offline: priming would sample common words and search.
       open_with_topic: false
       embedding: { provider: fake, model: fake, dim: 64 }
       seed: 0

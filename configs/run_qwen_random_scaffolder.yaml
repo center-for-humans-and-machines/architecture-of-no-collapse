@@ -1,7 +1,7 @@
 # Real random-scaffolder run: run_qwen + independent random action sampling.
 # Tune the three probabilities to control how often the model is nudged to
 # deepen vs. innovate, and how often a brand-new topic is injected. Inject uses
-# Tavily (from .env) + GloVe word vectors (downloaded and cached on first use).
+# Tavily (from .env).
 run:
   rounds: 100
   replicates: 1
@@ -26,7 +26,7 @@ interventions:
         innovate: 0.40
         inject: 0.10
       visibility: injections
-      # Inject a grounded starting topic before turn 0 (uses Tavily + GloVe).
+      # Inject a grounded starting topic before turn 0 (uses Tavily).
       open_with_topic: true
 
 metrics:

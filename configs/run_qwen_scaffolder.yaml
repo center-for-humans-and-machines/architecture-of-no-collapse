@@ -1,7 +1,6 @@
 # Real scaffolder run: run_qwen + the three-level scaffolder intervention.
 # The adjacent-similarity signal uses the same Qwen3-Embedding-8B endpoint as
-# the metrics. Level-3 injection (rare) uses Tavily (from .env) + GloVe word
-# vectors (downloaded and cached on first use).
+# the metrics. Level-3 injection (rare) uses Tavily (from .env).
 run:
   rounds: 100
   replicates: 1
@@ -23,7 +22,7 @@ interventions:
     options:
       threshold: 0.7
       visibility: all
-      # Inject a grounded starting topic before turn 0 (uses Tavily + GloVe).
+      # Inject a grounded starting topic before turn 0 (uses Tavily).
       open_with_topic: true
       seed: 67
       embedding: { provider: vllm, model: Qwen/Qwen3-Embedding-8B }

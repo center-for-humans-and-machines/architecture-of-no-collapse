@@ -19,6 +19,23 @@ class TopicUnavailable(RuntimeError):
     """Raised when the search pipeline cannot produce a grounded topic."""
 
 
+def _truncate_excerpt(text: str, limit: int | None) -> str:
+    """Trim ``text`` to ``limit`` characters without cutting mid-sentence.
+
+    When a limit is set and exceeded, the text is cut back to the last sentence
+    terminator within the window; failing that, to the last whitespace boundary
+    so a word is never split. ``None`` returns the text unchanged.
+    """
+    if limit is None or len(text) <= limit:
+        return text
+    window = text[:limit]
+    cut = max(window.rfind("."), window.rfind("!"), window.rfind("?"))
+    if cut != -1:
+        return window[: cut + 1]
+    space = window.rfind(" ")
+    return window[:space] if space > 0 else window
+
+
 @dataclass(frozen=True)
 class Topic:
     """A novel topic plus the provenance that produced it."""
@@ -41,7 +58,7 @@ class TopicInfuser:
         *,
         num_words: int = 3,
         top_k: int = 3,
-        max_excerpt_chars: int = 400,
+        max_excerpt_chars: int | None = None,
     ) -> None:
         if num_words < 1:
             raise ValueError("num_words must be >= 1")
@@ -61,12 +78,14 @@ class TopicInfuser:
             raise TopicUnavailable(f"word sampling failed: {exc}") from exc
         query, results = await self._search_words(words)
         result = results[0]
+        # Prefer the full parsed page text; fall back to Tavily's short snippet.
+        source_text = result.raw_content or result.content
         return Topic(
             words=tuple(words),
             query=query,
             title=result.title,
             url=result.url,
-            excerpt=result.content[: self._max_excerpt_chars],
+            excerpt=_truncate_excerpt(source_text, self._max_excerpt_chars),
             score=result.score,
         )
 

@@ -56,7 +56,7 @@ def test_role_mapping():
     intervention = Message("intervention", "noise", "hello", 0)
     assert _to_openai(intervention) == {
         "role": "user",
-        "content": "[noise] hello",
+        "content": "hello",
     }
     assistant = Message("assistant", "agent_0", "hi", 0)
     assert _to_openai(assistant) == {"role": "assistant", "content": "hi"}

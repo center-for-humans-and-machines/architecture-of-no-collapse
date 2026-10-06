@@ -31,20 +31,18 @@ from renewal.interventions.random_scaffolder.topics import (
     TopicUnavailable,
 )
 from renewal.interventions.random_scaffolder.words import (
-    DEFAULT_MODEL,
-    GloVeWordSampler,
+    CommonWordSampler,
     WordSampler,
 )
 
 __all__ = [
     "DEEPEN_PROMPTS",
-    "DEFAULT_MODEL",
     "DEFAULT_PROBABILITIES",
     "INNOVATE_PROMPTS",
     "Action",
+    "CommonWordSampler",
     "ConstantSchedule",
     "Distribution",
-    "GloVeWordSampler",
     "ProbabilitySchedule",
     "RandomPolicy",
     "RandomScaffolderIntervention",

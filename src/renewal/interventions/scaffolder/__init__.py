@@ -22,8 +22,7 @@ from renewal.interventions.scaffolder.topics import (
     TopicUnavailable,
 )
 from renewal.interventions.scaffolder.words import (
-    DEFAULT_MODEL,
-    GloVeWordSampler,
+    CommonWordSampler,
     WordSampler,
 )
 
@@ -32,9 +31,8 @@ __all__ = [
     "INNOVATE_PROMPTS",
     "Action",
     "AdjacentSimilaritySignal",
-    "DEFAULT_MODEL",
+    "CommonWordSampler",
     "EscalationPolicy",
-    "GloVeWordSampler",
     "ScaffolderIntervention",
     "SearchClient",
     "SearchResult",

@@ -1,9 +1,9 @@
 # Offline random-scaffolder smoke: fake LLM, no network or keys.
 # The policy draws deepen / innovate / inject independently each turn. Inject is
 # disabled (0.0) and the opening topic is off so the run stays offline: either
-# would otherwise have the fake sampler download GloVe vectors and search.
+# would otherwise trigger a Tavily search.
 # Set inject > 0 / open_with_topic true to exercise the level-3 path (needs
-# TAVILY_API_KEY and the word vectors).
+# TAVILY_API_KEY).
 run:
   rounds: 30
   replicates: 1
@@ -30,7 +30,7 @@ interventions:
         innovate: 0.20
         inject: 0.00
       visibility: all
-      # Keep the smoke offline: priming would sample GloVe words and search.
+      # Keep the smoke offline: priming would sample common words and search.
       open_with_topic: false
 
 metrics:

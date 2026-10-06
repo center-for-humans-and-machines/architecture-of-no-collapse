@@ -2,7 +2,9 @@
 
 Tavily is a search API designed for LLM grounding: one POST returns cleaned
 ``title`` / ``url`` / ``content`` for each hit, so there is no HTML scraping and
-no anti-bot fragility (the problem that made the DuckDuckGo scraper fail).
+no anti-bot fragility (the problem that made the DuckDuckGo scraper fail). We
+also request ``raw_content`` (the full parsed page text) so topic injections can
+use verbose, substantive source text instead of Tavily's short snippet.
 """
 
 from __future__ import annotations
@@ -21,12 +23,17 @@ _TAVILY_URL = "https://api.tavily.com/search"
 
 @dataclass(frozen=True)
 class SearchResult:
-    """One search hit."""
+    """One search hit.
+
+    ``content`` is Tavily's short AI-extracted snippet; ``raw_content`` is the
+    full parsed page text (present only when the request asks for it).
+    """
 
     title: str
     url: str
     content: str
     score: float | None = None
+    raw_content: str | None = None
 
 
 class SearchClient(Protocol):
@@ -67,6 +74,8 @@ class TavilySearchClient:
                     "search_depth": self.search_depth,
                     "max_results": top_k,
                     "include_answer": False,
+                    # Full parsed page text as plain text (no markdown markup).
+                    "include_raw_content": "text",
                 },
             )
         response.raise_for_status()
@@ -79,12 +88,14 @@ def _parse_results(payload: dict[str, Any], top_k: int) -> list[SearchResult]:
         url = str(item.get("url", "")).strip()
         if not url:
             continue
+        raw = item.get("raw_content")
         results.append(
             SearchResult(
                 title=str(item.get("title", "")).strip(),
                 url=url,
                 content=str(item.get("content", "")).strip(),
                 score=item.get("score"),
+                raw_content=str(raw).strip() if raw else None,
             )
         )
     return results

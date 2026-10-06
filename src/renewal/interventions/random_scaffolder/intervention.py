@@ -29,7 +29,7 @@ from renewal.interventions.random_scaffolder.topics import (
     TopicUnavailable,
 )
 from renewal.interventions.random_scaffolder.words import (
-    GloVeWordSampler,
+    CommonWordSampler,
     WordSampler,
 )
 from renewal.registry import Registry
@@ -54,21 +54,22 @@ DEFAULT_PROBABILITIES = Distribution(deepen=0.8, innovate=0.15, inject=0.05)
 def _topic_content(topic: Topic, *, opening: bool) -> str:
     """Compose the steering text for a grounded topic.
 
-    An ``opening`` topic seeds a conversation that has not started yet, so it
-    asks the model to begin; a mid-conversation injection asks it to connect the
-    new topic to what came before.
+    Only the excerpt is surfaced; the source title and URL are kept as
+    provenance in ``meta`` but never shown to the model. An ``opening`` topic
+    seeds a conversation that has not started yet, so it asks the model to
+    begin; a mid-conversation injection asks it to connect the new topic to what
+    came before.
     """
-    title = topic.title or "new topic"
     if opening:
         return (
-            f'Opening topic: "{title}" — {topic.excerpt} '
-            f"(source: {topic.url}). Start the conversation from this topic "
-            "and open with one informative observation about it."
+            f"Opening topic: {topic.excerpt}\n\n"
+            "Start the conversation from this topic and open with one "
+            "informative observation about it."
         )
     return (
-        f'New topic: "{title}" — {topic.excerpt} '
-        f"(source: {topic.url}). Connect it to the current conversation "
-        "and give one informative observation."
+        f"New topic: {topic.excerpt}\n\n"
+        "Connect it to the current conversation and give one informative "
+        "observation."
     )
 
 
@@ -114,10 +115,7 @@ class RandomScaffolderIntervention:
         seed: int = 0,
         num_words: int = 3,
         search_top_k: int = 3,
-        max_excerpt_chars: int = 400,
-        word_model: str = "glove-wiki-gigaword-100",
-        word_model_path: str | None = None,
-        cache_dir: str | None = None,
+        max_excerpt_chars: int | None = None,
         search_depth: str = "basic",
         search_timeout: float = 8.0,
         sampler: WordSampler | None = None,
@@ -133,13 +131,7 @@ class RandomScaffolderIntervention:
             ConstantSchedule(self.distribution), seed=seed
         )
         self._infuser = TopicInfuser(
-            sampler
-            or GloVeWordSampler(
-                word_model,
-                seed=seed,
-                model_path=word_model_path,
-                cache_dir=cache_dir,
-            ),
+            sampler or CommonWordSampler(seed=seed),
             search_client
             or TavilySearchClient(
                 timeout=search_timeout,

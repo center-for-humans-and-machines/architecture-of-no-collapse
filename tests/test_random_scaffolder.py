@@ -9,6 +9,7 @@ from renewal.interventions.random_scaffolder import (
     DEEPEN_PROMPTS,
     INNOVATE_PROMPTS,
     Action,
+    CommonWordSampler,
     ConstantSchedule,
     Distribution,
     RandomPolicy,
@@ -155,6 +156,41 @@ async def test_infuser_raises_when_no_results():
         await infuser.inject()
 
 
+async def test_infuser_prefers_raw_content_over_snippet():
+    client = _FakeSearch(
+        {
+            "mars terraforming colony": [
+                SearchResult(
+                    "Title",
+                    "https://example.com/x",
+                    "short snippet",
+                    0.9,
+                    raw_content="A much longer full page body.",
+                )
+            ]
+        }
+    )
+    infuser = TopicInfuser(_FakeSampler(), client, num_words=3)
+    topic = await infuser.inject()
+    assert topic.excerpt == "A much longer full page body."
+
+
+async def test_infuser_truncates_at_sentence_boundary():
+    text = "First sentence here. Second sentence here. Third sentence here."
+    client = _FakeSearch(
+        {
+            "mars terraforming colony": [
+                SearchResult("Title", "https://example.com/x", text, 0.9)
+            ]
+        }
+    )
+    infuser = TopicInfuser(
+        _FakeSampler(), client, num_words=3, max_excerpt_chars=30
+    )
+    topic = await infuser.inject()
+    assert topic.excerpt == "First sentence here."
+
+
 # --- intervention ----------------------------------------------------------
 
 
@@ -185,7 +221,10 @@ async def test_intervention_inject_path():
     message = await iv.act([_assistant("topic A", 0)])
     assert message.meta["level"] == "inject"
     assert message.meta["source_url"] == "https://example.com/m"
-    assert "Mars" in message.content
+    # The excerpt is surfaced; the title and source URL are not.
+    assert "content" in message.content
+    assert "Mars" not in message.content
+    assert "example.com" not in message.content
     assert message.meta["probabilities"] == {
         "deepen": 0.0,
         "innovate": 0.0,
@@ -337,4 +376,24 @@ def test_build_interventions_injects_run_seed():
     assert [interventions[0]._policy.decide(t) for t in range(10)] == [
         seed_set._policy.decide(t) for t in range(10)
     ]
+
+
+# --- word sampler ----------------------------------------------------------
+
+
+def test_common_word_sampler_returns_distinct_words():
+    sampler = CommonWordSampler(seed=0)
+    words = sampler.sample(3)
+    assert len(words) == 3
+    assert len(set(words)) == 3
+
+
+def test_common_word_sampler_uses_injected_words():
+    sampler = CommonWordSampler(seed=0, words=["apple", "banana", "cherry"])
+    assert set(sampler.sample(3)) == {"apple", "banana", "cherry"}
+
+
+def test_common_word_sampler_rejects_bad_count():
+    with pytest.raises(ValueError):
+        CommonWordSampler(seed=0).sample(0)
 
