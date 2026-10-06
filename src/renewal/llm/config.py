@@ -13,6 +13,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
+from renewal.llm.azure import AzureAPI
 from renewal.llm.base import BaseLLM
 from renewal.llm.fake import FakeLLM
 from renewal.llm.vllm import VllmAPI
@@ -31,7 +32,7 @@ class LLMConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    provider: Literal["vllm", "fake"] = "vllm"
+    provider: Literal["vllm", "azure", "fake"] = "vllm"
     model: str
 
     def materialize(self) -> BaseLLM:
@@ -48,6 +49,10 @@ class LLMConfig(BaseModel):
         match self.provider:
             case "vllm":
                 return VllmAPI(model=self.model)
+            case "azure":
+                # Azure routes by deployment name, so ``model`` names the
+                # deployment rather than an OpenAI model id.
+                return AzureAPI(deployment=self.model)
             case "fake":
                 return FakeLLM(model=self.model)
         raise ValueError(f"unknown provider: {self.provider}")

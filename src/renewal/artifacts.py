@@ -67,6 +67,12 @@ def _required_env(config: RunConfig) -> list[str]:
     names: list[str] = []
     if "vllm" in providers:
         names += ["MPCDF_VLLM_ENDPOINT_URL", "MPCDF_VLLM_MODEL"]
+    if "azure" in providers:
+        names += [
+            "AZURE_OPENAI_ENDPOINT",
+            "AZURE_OPENAI_API_KEY",
+            "AZURE_OPENAI_DEPLOYMENT",
+        ]
     return names
 
 

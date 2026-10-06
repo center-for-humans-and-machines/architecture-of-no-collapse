@@ -4,12 +4,11 @@ import pytest
 
 from renewal.core.message import Message
 from renewal.llm.env import safe_url
+from renewal.llm.openai_compat import clean_params, to_openai
 from renewal.llm.vllm import (
     VllmAPI,
-    _clean_params,
     _resolve_api_key,
     _resolve_endpoint,
-    _to_openai,
 )
 
 
@@ -47,19 +46,19 @@ def test_api_key_from_map(monkeypatch):
 
 
 def test_clean_params_drops_none_and_unknown():
-    assert _clean_params(
+    assert clean_params(
         {"temperature": 0.9, "max_tokens": 200, "top_p": None, "bogus": 1}
     ) == {"temperature": 0.9, "max_tokens": 200}
 
 
 def test_role_mapping():
     intervention = Message("intervention", "noise", "hello", 0)
-    assert _to_openai(intervention) == {
+    assert to_openai(intervention) == {
         "role": "user",
         "content": "hello",
     }
     assistant = Message("assistant", "agent_0", "hi", 0)
-    assert _to_openai(assistant) == {"role": "assistant", "content": "hi"}
+    assert to_openai(assistant) == {"role": "assistant", "content": "hi"}
 
 
 def test_safe_url():

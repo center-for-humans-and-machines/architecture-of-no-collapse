@@ -1,0 +1,34 @@
+# Live smoke / example: one Azure OpenAI deployment, credentials from .env.
+# `model` is the Azure *deployment* name, not an OpenAI model id (see
+# AZURE_OPENAI_* in .env.example). Embedding stays on the fake provider so the
+# run needs only Azure credentials.
+run:
+  rounds: 2
+  replicates: 1
+  seed: 0
+  window_size: 10
+
+agents:
+  n: 1
+  params:
+    temperature: 0.9
+    max_tokens: 200
+  pool:
+    - { provider: azure, model: gpt-4o-mini }
+  prompt_source: prompts/prompts.yaml
+
+interventions: []
+
+metrics:
+  window_size: 10
+  embedding:
+    provider: fake
+    model: fake
+  enabled: []
+
+logging:
+  out_dir: outputs
+  experiment_name: smoke_azure
+  labels: { experiment: smoke_azure, model: gpt-4o-mini }
+  console_level: INFO
+  file_level: DEBUG

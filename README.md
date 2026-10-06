@@ -41,6 +41,26 @@ Outputs land in `outputs/<experiment>/<timestamp>_seed<N>/` with
 `metrics.parquet` (long-format measures) and `embeddings.parquet` (per-window
 vectors).
 
+### LLM providers
+
+Each agent names a `provider` and `model` in the config `pool`. Supported
+providers are `vllm` (default, MPCDF cluster), `azure`, and `fake`. Credentials
+and endpoints never live in the YAML — they come from `.env`:
+
+- `vllm` — `MPCDF_VLLM_ENDPOINT_URL` (or per-model `MPCDF_VLLM_ENDPOINTS`) and
+  `MPCDF_VLLM_MODEL`; `model` is the served model id.
+- `azure` — `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, and optionally
+  `AZURE_OPENAI_API_VERSION` (default `2024-12-01-preview`); `model` is the
+  Azure **deployment name**, not an OpenAI model id. See
+  `configs/smoke_azure.yaml`.
+- `fake` — deterministic offline model, no credentials.
+
+```yaml
+agents:
+  pool:
+    - { provider: azure, model: gpt-4o-mini }
+```
+
 ### Memory (forgetting)
 
 Agents need not see the whole conversation. `run.memory_turns` (default `20`)

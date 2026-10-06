@@ -24,24 +24,14 @@ from openai import AsyncOpenAI
 from renewal.core.message import Message
 from renewal.llm.base import BaseLLM
 from renewal.llm.env import safe_url, setting
+from renewal.llm.openai_compat import (
+    LOCAL_API_KEY,
+    clean_params,
+    first_text,
+    to_openai,
+)
 
 LOGGER = logging.getLogger(__name__)
-
-# Placeholder credential for an unauthenticated local server; the OpenAI
-# client refuses to start without one. Never a real secret.
-LOCAL_API_KEY = "local-no-auth"
-
-# Generation params we forward to the server, dropped when None.
-_ALLOWED_PARAMS = frozenset(
-    {
-        "temperature",
-        "max_tokens",
-        "top_p",
-        "seed",
-        "frequency_penalty",
-        "presence_penalty",
-    }
-)
 
 
 def _json_env(name: str) -> dict[str, str] | None:
@@ -73,19 +63,6 @@ def _resolve_api_key(endpoint: str | None, explicit: str | None) -> str:
     if keys and endpoint and endpoint in keys:
         return keys[endpoint]
     return os.getenv("MPCDF_VLLM_API_KEY") or LOCAL_API_KEY
-
-
-def _to_openai(message: Message) -> dict[str, str]:
-    # OpenAI-compatible APIs have no "intervention" role; interventions are
-    # surfaced as plain user turns (the speaker is kept on the Message for the
-    # transcript, but is not injected into the prompt).
-    if message.role == "intervention":
-        return {"role": "user", "content": message.content}
-    return {"role": message.role, "content": message.content}
-
-
-def _clean_params(params: dict[str, Any]) -> dict[str, Any]:
-    return {k: v for k, v in params.items() if k in _ALLOWED_PARAMS and v is not None}
 
 
 class VllmAPI(BaseLLM):
@@ -128,13 +105,8 @@ class VllmAPI(BaseLLM):
     async def generate(self, messages: list[Message], params: dict[str, Any]) -> str:
         kwargs: dict[str, Any] = {
             "model": self.model,
-            "messages": [_to_openai(m) for m in messages],
+            "messages": [to_openai(m) for m in messages],
         }
-        kwargs.update(_clean_params(params))
+        kwargs.update(clean_params(params))
         response = await self.client.chat.completions.create(**kwargs)
-        if not response.choices:
-            raise ValueError("vLLM response had no choices")
-        content = response.choices[0].message.content
-        if not content:
-            raise ValueError("vLLM response content was empty")
-        return content
+        return first_text(response, "vLLM")
