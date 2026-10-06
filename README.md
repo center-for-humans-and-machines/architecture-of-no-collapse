@@ -95,6 +95,41 @@ A live run sets `embedding: { provider: vllm, model: Qwen/Qwen3-Embedding-8B }`
 and requires `TAVILY_API_KEY` (used only when a level-3 injection fires) plus
 the GloVe word vectors, downloaded and cached on first use.
 
+### Random scaffolder
+
+`random_scaffolder` is a self-contained sibling of the scaffolder with the same
+three levels and prompts, but the policy ignores similarity. Instead it defines
+a fixed probability distribution `p(x)` and, **on every turn independently**,
+draws one action from it:
+
+```yaml
+interventions:
+  - type: random_scaffolder
+    options:
+      probabilities:
+        deepen: 0.80    # nudge to deepen
+        innovate: 0.15  # nudge to innovate
+        inject: 0.05    # infuse a new topic via search
+      visibility: all
+```
+
+The three probabilities must be non-negative and sum to one. The random draw
+uses the run's application seed (`run.seed` / `--seed`, offset by replicate), so
+there is no per-intervention seed and the sequence is reproducible. `visibility`
+keeps the same meaning as above (`all` / `injections` / `transient`). Each
+message records its `level`, the `probabilities` used, and the uniform `draw`
+that selected the action (plus the sampled `words`, `query`, `source_url`, and
+`source_title` for `inject`).
+
+Offline smoke (fake LLM, inject disabled so no Tavily or word-vector download):
+
+```bash
+poetry run renewal run configs/random_scaffolder_smoke.yaml
+```
+
+A live run is `configs/run_qwen_random_scaffolder.yaml`, which sets
+`inject: 0.05` and uses the same Tavily + GloVe injection path as the scaffolder.
+
 ## Viewer
 
 A standalone web app (FastAPI + Svelte + Plotly) for browsing runs, reading

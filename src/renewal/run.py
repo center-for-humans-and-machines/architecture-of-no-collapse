@@ -60,11 +60,17 @@ def build_agents(config: RunConfig, seed: int) -> list[Agent]:
     return agents
 
 
-def build_interventions(config: RunConfig) -> list:
-    return [
-        Registry.get("intervention", iv.type)(**iv.options)
-        for iv in config.interventions
-    ]
+def build_interventions(config: RunConfig, seed: int) -> list:
+    """Build each configured intervention, passing the run seed to those that
+    opt in with ``uses_run_seed`` (so their randomness matches the run)."""
+    interventions: list = []
+    for iv in config.interventions:
+        target = Registry.get("intervention", iv.type)
+        options = dict(iv.options)
+        if getattr(target, "uses_run_seed", False):
+            options["seed"] = seed
+        interventions.append(target(**options))
+    return interventions
 
 
 def _attach_llm_call_log(run_dir: Path) -> logging.Handler:
@@ -89,7 +95,7 @@ async def run_replicate(
     llm_call_handler = _attach_llm_call_log(run_dir) if debug else None
     try:
         agents = build_agents(config, seed)
-        interventions = build_interventions(config)
+        interventions = build_interventions(config, seed)
         scheduler = Scheduler(len(agents), seed)
 
         enabled = enabled_metrics(config, force=force_metrics)
