@@ -3,7 +3,7 @@
 # deepen vs. innovate, and how often a brand-new topic is injected. Inject uses
 # Tavily (from .env).
 run:
-  rounds: 100
+  rounds: 150
   replicates: 1
   seed: 35
   window_size: 10

@@ -4,7 +4,7 @@
 run:
   rounds: 100
   replicates: 1
-  seed: 35
+  seed: 101
   window_size: 10
   memory_turns: 5
 
