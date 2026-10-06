@@ -1,4 +1,6 @@
-# Real random-scaffolder run: run_qwen + independent random action sampling.
+# Real random-scaffolder run for DeepSeek: run_deepseek + independent random
+# action sampling. DeepSeek is served by the MPCDF vLLM cluster (provider:
+# vllm, model deepseek-ai/DeepSeek-V4-Flash in the endpoint map from .env).
 # Tune the three probabilities to control how often the model is nudged to
 # deepen vs. innovate, and how often a brand-new topic is injected. Inject uses
 # Tavily (from .env).
@@ -15,7 +17,7 @@ agents:
     temperature: 0.9
     max_tokens: 500
   pool:
-    - { provider: vllm, model: Qwen/Qwen3-30B-A3B-Instruct-2507 }
+    - { provider: vllm, model: deepseek-ai/DeepSeek-V4-Flash }
   prompt_source: prompts/prompts.yaml
 
 interventions:
@@ -38,10 +40,10 @@ metrics:
 
 logging:
   out_dir: outputs
-  experiment_name: run_qwen_random_scaffolder
+  experiment_name: run_deepseek_random_scaffolder
   labels:
-    experiment: run_qwen_random_scaffolder
-    model: Qwen3-30B-A3B-Instruct-2507
+    experiment: run_deepseek_random_scaffolder
+    model: deepseek-ai/DeepSeek-V4-Flash
     condition: random_scaffolder
   console_level: INFO
   file_level: DEBUG
