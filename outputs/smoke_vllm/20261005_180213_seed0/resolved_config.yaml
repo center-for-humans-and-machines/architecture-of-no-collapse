@@ -1,0 +1,39 @@
+run:
+  rounds: 2
+  replicates: 1
+  seed: 0
+  window_size: 10
+agents:
+  n: 3
+  params:
+    temperature: 0.9
+    max_tokens: 200
+    top_p: null
+    seed: null
+    frequency_penalty: null
+    presence_penalty: null
+  pool:
+  - provider: vllm
+    model: Qwen/Qwen3-30B-A3B-Instruct-2507
+  - provider: vllm
+    model: Qwen/Qwen3-30B-A3B-Instruct-2507
+  - provider: vllm
+    model: Qwen/Qwen3-30B-A3B-Instruct-2507
+  prompt_source: prompts/prompts.yaml
+  system_prompt: You are an agent in an open-ended multi-agent conversation.
+  prompts_override: {}
+interventions: []
+metrics:
+  window_size: 10
+  embedding:
+    provider: vllm
+    model: Qwen/Qwen3-Embedding-8B
+    dim: null
+  enabled: []
+logging:
+  out_dir: outputs
+  experiment_name: smoke_vllm
+  labels:
+    experiment: smoke_vllm
+  console_level: INFO
+  file_level: DEBUG

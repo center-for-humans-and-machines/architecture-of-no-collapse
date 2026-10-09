@@ -1,0 +1,18 @@
+2026-10-05 18:08:37,821 DEBUG asyncio: Using selector: KqueueSelector
+2026-10-05 18:08:37,853 DEBUG renewal.llm.config: materializing api: provider=vllm model=Qwen/Qwen3-30B-A3B-Instruct-2507
+2026-10-05 18:08:37,853 DEBUG renewal.llm.env: setting MPCDF_VLLM_MODEL resolved from argument: present
+2026-10-05 18:08:37,853 DEBUG renewal.llm.vllm: Initializing VllmAPI: model=Qwen/Qwen3-30B-A3B-Instruct-2507 endpoint=https://llm.mpcdf.mpg.de api_key=set client=unset
+2026-10-05 18:08:37,882 DEBUG renewal.llm.config: materializing api: provider=vllm model=Qwen/Qwen3-30B-A3B-Instruct-2507
+2026-10-05 18:08:37,882 DEBUG renewal.llm.env: setting MPCDF_VLLM_MODEL resolved from argument: present
+2026-10-05 18:08:37,882 DEBUG renewal.llm.vllm: Initializing VllmAPI: model=Qwen/Qwen3-30B-A3B-Instruct-2507 endpoint=https://llm.mpcdf.mpg.de api_key=set client=unset
+2026-10-05 18:08:37,891 DEBUG renewal.llm.config: materializing api: provider=vllm model=Qwen/Qwen3-30B-A3B-Instruct-2507
+2026-10-05 18:08:37,891 DEBUG renewal.llm.env: setting MPCDF_VLLM_MODEL resolved from argument: present
+2026-10-05 18:08:37,891 DEBUG renewal.llm.vllm: Initializing VllmAPI: model=Qwen/Qwen3-30B-A3B-Instruct-2507 endpoint=https://llm.mpcdf.mpg.de api_key=set client=unset
+2026-10-05 18:08:37,901 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 18:08:38,969 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 18:08:40,276 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 18:08:41,889 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 18:08:43,580 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 18:08:45,329 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 18:08:47,446 INFO renewal.run: run 3af08e4e4d37 completed in outputs/smoke_vllm/20261005_180837_seed0
+2026-10-05 18:08:47,447 INFO renewal.run: replicate 0: {'run_id': '3af08e4e4d37', 'run_dir': 'outputs/smoke_vllm/20261005_180837_seed0', 'seed': 0, 'turns': 6}

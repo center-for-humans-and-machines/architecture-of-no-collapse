@@ -1,0 +1,37 @@
+# Real baseline run: run_qwen with no intervention. This is the control
+# condition for the scaffolder runs, holding the run, agent, and metric
+# settings fixed so only the presence of steering differs.
+run:
+  rounds: 100
+  replicates: 1
+  seed: 101
+  window_size: 10
+  memory_turns: 5
+
+agents:
+  n: 1
+  params:
+    temperature: 0.9
+    max_tokens: 500
+  pool:
+    - { provider: vllm, model: Qwen/Qwen3-30B-A3B-Instruct-2507 }
+  prompt_source: prompts/prompts.yaml
+
+interventions: []
+
+metrics:
+  window_size: 10
+  embedding:
+    provider: vllm
+    model: Qwen/Qwen3-Embedding-8B
+  enabled: [lexical_diversity, semantic_anchor_sim, semantic_adjacent_sim, cross_run_sim]
+
+logging:
+  out_dir: outputs
+  experiment_name: run_qwen_no_scaffolding
+  labels:
+    experiment: run_qwen_no_scaffolding
+    model: Qwen3-30B-A3B-Instruct-2507
+    condition: no_scaffolding
+  console_level: INFO
+  file_level: DEBUG

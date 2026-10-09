@@ -1,0 +1,94 @@
+2026-10-05 21:45:13,723 DEBUG asyncio: Using selector: KqueueSelector
+2026-10-05 21:45:13,762 DEBUG renewal.llm.config: materializing api: provider=vllm model=Qwen/Qwen3-30B-A3B-Instruct-2507
+2026-10-05 21:45:13,762 DEBUG renewal.llm.env: setting MPCDF_VLLM_MODEL resolved from argument: present
+2026-10-05 21:45:13,762 DEBUG renewal.llm.vllm: Initializing VllmAPI: model=Qwen/Qwen3-30B-A3B-Instruct-2507 endpoint=https://llm.mpcdf.mpg.de api_key=set client=unset
+2026-10-05 21:45:13,797 DEBUG renewal.llm.embed: Initializing VllmEmbedding: model=Qwen/Qwen3-Embedding-8B endpoint=https://llm.mpcdf.mpg.de api_key=set client=unset
+2026-10-05 21:45:13,807 DEBUG renewal.llm.embed: Initializing VllmEmbedding: model=Qwen/Qwen3-Embedding-8B endpoint=https://llm.mpcdf.mpg.de api_key=set client=unset
+2026-10-05 21:45:13,818 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:15,301 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:15,812 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:16,641 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:18,483 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:19,637 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:21,356 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:22,643 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:24,682 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:26,546 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:28,950 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:31,586 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:34,097 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:35,977 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:38,929 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:42,384 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:46,037 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:49,896 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:52,891 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:45:57,232 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:46:02,342 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:46:07,107 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:46:12,141 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:46:15,919 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:46:29,101 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:46:35,014 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:46:40,932 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:46:50,678 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:46:57,298 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:47:04,186 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:47:13,417 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:47:20,863 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:47:28,458 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:47:31,880 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:47:39,733 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:47:47,872 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:47:59,849 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:48:08,476 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:48:17,369 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:48:21,979 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:48:32,062 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:48:41,511 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:48:51,206 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:49:01,147 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:49:07,860 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:49:18,032 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:49:28,495 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:49:39,159 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:49:49,970 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:49:57,287 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:50:09,190 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:50:20,578 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:50:32,224 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:50:43,975 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:50:55,919 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:51:02,714 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:51:15,001 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:51:27,702 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:51:40,456 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:51:49,708 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:52:03,532 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:52:18,370 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:52:32,016 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:52:45,994 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:53:04,041 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:53:18,583 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:53:33,217 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:53:41,759 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:53:56,789 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:54:11,992 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:54:28,155 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:54:43,800 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:54:50,691 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:55:06,536 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:55:22,792 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:55:39,109 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:55:46,776 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:56:03,497 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:56:20,333 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:56:37,435 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:56:55,406 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-05 21:57:03,314 DEBUG renewal.llm.base: VllmAPI attempt 1/3
+2026-10-06 01:09:38,559 WARNING renewal.llm.base: VllmAPI attempt 1/3 failed: Request timed out.
+2026-10-06 01:09:39,062 DEBUG renewal.llm.base: VllmAPI attempt 2/3
+2026-10-06 01:09:39,802 WARNING renewal.llm.base: VllmAPI attempt 2/3 failed: Error code: 405
+2026-10-06 01:09:40,804 DEBUG renewal.llm.base: VllmAPI attempt 3/3
+2026-10-06 01:09:41,545 WARNING renewal.llm.base: VllmAPI attempt 3/3 failed: Error code: 405
+2026-10-06 01:09:41,546 WARNING renewal.llm.base: VllmAPI exhausted 3 attempts

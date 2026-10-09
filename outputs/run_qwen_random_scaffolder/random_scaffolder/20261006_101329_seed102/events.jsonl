@@ -1,0 +1,55 @@
+{"run_id": "0406c8aad27c", "event": "run_started", "ts": "2026-10-06T08:13:29+00:00", "seed": 102, "rounds": 100}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:13:35+00:00", "turn_index": -1, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:13:39+00:00", "turn_index": 0, "round": 0, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:13:39+00:00", "turn_index": 0, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:13:42+00:00", "turn_index": 1, "round": 1, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:13:42+00:00", "turn_index": 1, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:13:48+00:00", "turn_index": 2, "round": 2, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:13:48+00:00", "turn_index": 2, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:13:54+00:00", "turn_index": 3, "round": 3, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:13:54+00:00", "turn_index": 3, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:14:04+00:00", "turn_index": 4, "round": 4, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:14:04+00:00", "turn_index": 4, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:14:15+00:00", "turn_index": 5, "round": 5, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:14:15+00:00", "turn_index": 5, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:14:26+00:00", "turn_index": 6, "round": 6, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:14:26+00:00", "turn_index": 6, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:14:41+00:00", "turn_index": 7, "round": 7, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:14:41+00:00", "turn_index": 7, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:14:58+00:00", "turn_index": 8, "round": 8, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:14:58+00:00", "turn_index": 8, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:15:10+00:00", "turn_index": 9, "round": 9, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:15:10+00:00", "turn_index": 9, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:15:16+00:00", "turn_index": 10, "round": 10, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:15:16+00:00", "turn_index": 10, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:15:33+00:00", "turn_index": 11, "round": 11, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:15:33+00:00", "turn_index": 11, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:15:53+00:00", "turn_index": 12, "round": 12, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:15:53+00:00", "turn_index": 12, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:16:11+00:00", "turn_index": 13, "round": 13, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:16:11+00:00", "turn_index": 13, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:16:33+00:00", "turn_index": 14, "round": 14, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:16:33+00:00", "turn_index": 14, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:16:45+00:00", "turn_index": 15, "round": 15, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:16:45+00:00", "turn_index": 15, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:17:01+00:00", "turn_index": 16, "round": 16, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:17:01+00:00", "turn_index": 16, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:17:06+00:00", "turn_index": 17, "round": 17, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:17:06+00:00", "turn_index": 17, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:17:27+00:00", "turn_index": 18, "round": 18, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:17:27+00:00", "turn_index": 18, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:17:46+00:00", "turn_index": 19, "round": 19, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:17:46+00:00", "turn_index": 19, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:18:07+00:00", "turn_index": 20, "round": 20, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:18:07+00:00", "turn_index": 20, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:18:23+00:00", "turn_index": 21, "round": 21, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:18:23+00:00", "turn_index": 21, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:18:36+00:00", "turn_index": 22, "round": 22, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:18:36+00:00", "turn_index": 22, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:18:48+00:00", "turn_index": 23, "round": 23, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:18:48+00:00", "turn_index": 23, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:18:52+00:00", "turn_index": 24, "round": 24, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:18:52+00:00", "turn_index": 24, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "turn", "ts": "2026-10-06T08:19:04+00:00", "turn_index": 25, "round": 25, "position": 0, "speaker": "agent_0"}
+{"run_id": "0406c8aad27c", "event": "intervention", "ts": "2026-10-06T08:19:04+00:00", "turn_index": 25, "speaker": "random_scaffolder"}
+{"run_id": "0406c8aad27c", "event": "run_failed", "ts": "2026-10-06T08:19:11+00:00", "error": "CancelledError: "}
