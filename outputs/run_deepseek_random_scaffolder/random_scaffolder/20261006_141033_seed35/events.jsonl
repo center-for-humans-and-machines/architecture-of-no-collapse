@@ -1,3 +1,0 @@
-{"run_id": "88664057103c", "event": "run_started", "ts": "2026-10-06T12:10:34+00:00", "seed": 35, "rounds": 100}
-{"run_id": "88664057103c", "event": "intervention", "ts": "2026-10-06T12:10:35+00:00", "turn_index": -1, "speaker": "random_scaffolder"}
-{"run_id": "88664057103c", "event": "run_failed", "ts": "2026-10-06T12:10:37+00:00", "error": "GenerationExhaustedError: exhausted 3 generation attempt(s)"}

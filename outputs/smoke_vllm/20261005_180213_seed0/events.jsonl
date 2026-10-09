@@ -1,2 +1,0 @@
-{"run_id": "741d6616f968", "event": "run_started", "ts": "2026-10-05T16:02:13+00:00", "seed": 0, "rounds": 2}
-{"run_id": "741d6616f968", "event": "run_failed", "ts": "2026-10-05T16:02:13+00:00", "error": "ValueError: MPCDF_VLLM_ENDPOINTS must be valid JSON"}

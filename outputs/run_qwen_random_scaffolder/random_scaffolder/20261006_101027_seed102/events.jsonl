@@ -1,2 +1,0 @@
-{"run_id": "cdd41142853f", "event": "run_started", "ts": "2026-10-06T08:10:28+00:00", "seed": 102, "rounds": 100}
-{"run_id": "cdd41142853f", "event": "run_failed", "ts": "2026-10-06T08:10:28+00:00", "error": "ValueError: probabilities must sum to 1, got 1.05"}

@@ -1,3 +1,0 @@
-2026-10-05 18:02:13,155 DEBUG asyncio: Using selector: KqueueSelector
-2026-10-05 18:02:13,186 DEBUG renewal.llm.config: materializing api: provider=vllm model=Qwen/Qwen3-30B-A3B-Instruct-2507
-2026-10-05 18:02:13,186 DEBUG renewal.llm.env: setting MPCDF_VLLM_MODEL resolved from argument: present
