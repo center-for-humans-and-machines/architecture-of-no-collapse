@@ -39,7 +39,7 @@ Full documentation is in [`docs/`](docs/00_index.md):
 | [Configuration](docs/04_configuration.md) | The run YAML reference and defaults |
 | [LLM providers](docs/05_llm-providers.md) | vLLM (MPCDF), Azure, and fake; credentials and env vars |
 | [Metrics](docs/06_metrics.md) | The four Kong-default collapse measures and `analyze` |
-| [Interventions](docs/07_interventions.md) | The `scaffolder` and `random_scaffolder` policies |
+| [Interventions](docs/07_interventions.md) | The `scaffolder`, `random_scaffolder`, and `reflective_llm_scaffolder` policies |
 | [Run artifacts](docs/08_artifacts.md) | Every file and column a run writes |
 | [Architecture](docs/09_architecture.md) | Module layout and core interfaces |
 | [Testing](docs/10_testing.md) | Unit, offline smoke, and live integration tests |

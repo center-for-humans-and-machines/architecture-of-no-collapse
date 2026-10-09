@@ -68,13 +68,17 @@ def build_agents(config: RunConfig, seed: int) -> list[Agent]:
 
 def build_interventions(config: RunConfig, seed: int) -> list:
     """Build each configured intervention, passing the run seed to those that
-    opt in with ``uses_run_seed`` (so their randomness matches the run)."""
+    opt in with ``uses_run_seed`` and the looping model's token budget to those
+    that opt in with ``uses_loop_max_tokens`` (so a scaffolding LLM can size its
+    summaries to the model it steers)."""
     interventions: list = []
     for iv in config.interventions:
         target = Registry.get("intervention", iv.type)
         options = dict(iv.options)
         if getattr(target, "uses_run_seed", False):
             options["seed"] = seed
+        if getattr(target, "uses_loop_max_tokens", False):
+            options["loop_max_tokens"] = config.agents.params.max_tokens
         interventions.append(target(**options))
     return interventions
 

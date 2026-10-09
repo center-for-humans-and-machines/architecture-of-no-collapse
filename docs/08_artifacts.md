@@ -22,7 +22,7 @@ outputs/<experiment_name>/[<condition>/]<timestamp>_seed<N>[_<n>]/
 | `config.yaml` | The source config, verbatim | Run start |
 | `resolved_config.yaml` | Fully resolved config with all defaults filled in | Run start |
 | `transcript.jsonl` | Canonical turns and intervention messages, one JSON object per line | Appended per turn |
-| `events.jsonl` | Lifecycle and per-turn events (`run_started`, `turn`, `intervention`, `run_completed` / `run_failed`) | Appended per event |
+| `events.jsonl` | Lifecycle and per-turn events (`run_started`, `turn`, `intervention`, `condense`, `run_completed` / `run_failed`) | Appended per event |
 | `meta.json` | Run metadata and status (see below) | Updated on start/finish/fail |
 | `run.log` | Per-run log at `logging.file_level` | Throughout the run |
 | `llm_calls.jsonl` | One record per model call | Only with `--debug` |
@@ -51,7 +51,12 @@ Each line is a `Message` plus the `run_id`:
 Assistant turns carry `round`, `position`, `provider`, and `model` in `meta`.
 Intervention messages carry intervention-specific provenance, such as `level`,
 `signal`, `threshold`, `probabilities`, `draw`, `words`, `query`,
-`source_url`, `source_title`, and `opening`.
+`source_url`, `source_title`, `summarized`, `condense`, and `opening`.
+
+A `condense` event marks a history compression: its `since_turn` is the first
+turn dropped and `removed_turns` lists every dropped index. The dropped messages
+remain in `transcript.jsonl`; only the loop's in-memory history is replaced by
+the recap (and, for the reflective scaffolder, the new topic).
 
 ## `meta.json`
 

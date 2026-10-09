@@ -1,0 +1,60 @@
+# Offline reflective-LLM-scaffolder smoke: fake looping model, fake scaffolding
+# LLM, no network or keys.
+# The policy draws deepen / innovate / inject independently each turn. Deepen
+# and innovate are turned into steering text by the (fake) scaffolding LLM.
+# Inject is disabled (0.0) and the opening topic is off so the run stays
+# offline: either would otherwise sample common words and call Tavily.
+# Set inject > 0 / open_with_topic true to exercise the search + summarize +
+# condense path (needs TAVILY_API_KEY).
+run:
+  rounds: 100
+  replicates: 1
+  seed: 0
+  window_size: 10
+  memory_turns: 5
+
+agents:
+  n: 3
+  params:
+    temperature: 0.9
+    max_tokens: 200
+  pool:
+    - { provider: fake, model: fake }
+    - { provider: fake, model: fake }
+    - { provider: fake, model: fake }
+  prompt_source: prompts/prompts.yaml
+
+interventions:
+  - type: reflective_llm_scaffolder
+    options:
+      probabilities:
+        deepen: 0.80
+        innovate: 0.20
+        inject: 0.00
+      visibility: all
+      # Keep the smoke offline: priming would sample common words and search.
+      open_with_topic: false
+      # The shared scaffolding LLM; fake keeps the run deterministic/offline.
+      llm: { provider: fake, model: fake }
+      # Each method has an `enabled` bool, a `system_prompt`, and (deepen /
+      # innovate / condense) a `history_turns` window. Prompts default to the
+      # built-ins, so only the switches are shown here.
+      deepen: { enabled: true }
+      innovate: { enabled: true }
+      summarize: { enabled: true }
+      condense: { enabled: true }
+
+metrics:
+  window_size: 10
+  embedding:
+    provider: fake
+    model: fake
+    dim: 64
+  enabled: [lexical_diversity, semantic_anchor_sim, semantic_adjacent_sim]
+
+logging:
+  out_dir: outputs
+  experiment_name: reflective_llm_scaffolder_smoke
+  labels: { experiment: reflective_llm_scaffolder_smoke }
+  console_level: INFO
+  file_level: DEBUG

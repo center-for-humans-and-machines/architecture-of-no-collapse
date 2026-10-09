@@ -6,6 +6,7 @@ from renewal.core.agent import Agent
 from renewal.core.loop import Loop
 from renewal.core.message import Message
 from renewal.core.scheduler import Scheduler
+from renewal.interventions.base import HistoryReplacement
 from renewal.llm.fake import FakeLLM
 
 
@@ -13,12 +14,18 @@ class NullRecorder:
     def __init__(self):
         self.turns = []
         self.interventions = []
+        self.condensations = []
 
     def turn(self, message):
         self.turns.append(message)
 
     def intervention(self, message):
         self.interventions.append(message)
+
+    def condense(self, *, since_turn, removed_turns):
+        self.condensations.append(
+            {"since_turn": since_turn, "removed_turns": removed_turns}
+        )
 
 
 def _agents(n=3):
@@ -254,3 +261,57 @@ async def test_memory_keeps_interventions_of_retained_turns():
     # Turn 2 keeps only the latest agent turn and its attached intervention;
     # the earlier turn's tag (turn_index 0) is forgotten.
     assert llm.prompts[2] == ["SYS", "turn1", "tag1"]
+
+
+class ReplaceOnceIntervention:
+    """Compress history once, when the given turn is reached."""
+
+    name = "replace"
+
+    def __init__(self, *, since: int, at: int, content: str = "recap") -> None:
+        self._since = since
+        self._at = at
+        self._content = content
+        self._done = False
+
+    async def act(self, messages):
+        latest = [m for m in messages if m.role == "assistant"][-1]
+        if self._done or latest.turn_index != self._at:
+            return None
+        self._done = True
+        return HistoryReplacement(
+            since=self._since,
+            messages=[
+                Message(
+                    "intervention",
+                    self.name,
+                    self._content,
+                    latest.turn_index,
+                )
+            ],
+        )
+
+
+async def test_history_replacement_compresses_context_but_keeps_turns():
+    llm = CountingLLM()
+    agent = Agent(name="agent_0", llm=llm, system_prompt="SYS", params={})
+    recorder = NullRecorder()
+    loop = Loop(
+        [agent],
+        Scheduler(1, 0),
+        [ReplaceOnceIntervention(since=0, at=2)],
+        recorder,
+    )
+    await loop.run(4)
+
+    # Canonical history drops turns 0-2 and keeps the recap in their place...
+    assert [m.content for m in loop.history] == ["recap", "turn3"]
+    assert [m.turn_index for m in loop.history] == [2, 3]
+    # ...the following prompt sees only the recap (turn 2's context is gone)...
+    assert llm.prompts[3] == ["SYS", "recap"]
+    # ...the transcript-level turn list keeps every assistant turn for metrics...
+    assert [m.content for m in loop.turns] == ["turn0", "turn1", "turn2", "turn3"]
+    # ...and the compression boundary is recorded.
+    assert recorder.condensations == [
+        {"since_turn": 0, "removed_turns": [0, 1, 2]}
+    ]

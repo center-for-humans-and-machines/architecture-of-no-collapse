@@ -1,0 +1,65 @@
+# Real reflective-LLM-scaffolder run: Qwen loops the conversation while a
+# (separate) Qwen scaffolding LLM authors the deepening/innovation steers,
+# summarizes searched source text, and condenses the conversation since the
+# last topic before a new one is introduced.
+# Inject + the opening topic use Tavily (from .env).
+run:
+  rounds: 200
+  replicates: 5
+  seed: 0
+  window_size: 10
+  memory_turns: 5
+
+agents:
+  n: 1
+  params:
+    temperature: 0.9
+    # The looping model's token budget; the scaffolder sizes each search
+    # summary to this many tokens.
+    max_tokens: 500
+  pool:
+    - { provider: vllm, model: Qwen/Qwen3-30B-A3B-Instruct-2507 }
+  prompt_source: prompts/prompts.yaml
+
+interventions:
+  - type: reflective_llm_scaffolder
+    options:
+      probabilities:
+        deepen: 0.50
+        innovate: 0.40
+        inject: 0.10
+      visibility: injections
+      # Inject a grounded starting topic before turn 0 (uses Tavily).
+      open_with_topic: true
+      # The shared scaffolding LLM. Prompts below default to the built-ins, so
+      # delete any block to fall back to the default prompt for that method.
+      llm: { provider: vllm, model: Qwen/Qwen3-30B-A3B-Instruct-2507 }
+      deepen:
+        enabled: true
+        history_turns: 1
+      innovate:
+        enabled: true
+        history_turns: 1
+      summarize:
+        enabled: true
+      condense:
+        enabled: true
+        # null = condense everything since the last topic was introduced.
+        history_turns: null
+
+metrics:
+  window_size: 10
+  embedding:
+    provider: vllm
+    model: Qwen/Qwen3-Embedding-8B
+  enabled: [lexical_diversity, semantic_anchor_sim, semantic_adjacent_sim, cross_run_sim]
+
+logging:
+  out_dir: outputs
+  experiment_name: run_qwen_reflective_llm_scaffolder
+  labels:
+    experiment: run_qwen_reflective_llm_scaffolder
+    model: Qwen3-30B-A3B-Instruct-2507
+    condition: reflective_llm_scaffolder
+  console_level: INFO
+  file_level: DEBUG

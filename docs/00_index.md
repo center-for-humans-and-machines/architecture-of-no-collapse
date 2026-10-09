@@ -15,7 +15,7 @@ the [design plans](../plan/) for the architecture and build order.
 - [Configuration](04_configuration.md) — the run YAML schema and every default.
 - [LLM providers](05_llm-providers.md) — vLLM (MPCDF), Azure, and fake.
 - [Metrics](06_metrics.md) — the four Kong-default measures and `renewal analyze`.
-- [Interventions](07_interventions.md) — `scaffolder` and `random_scaffolder`.
+- [Interventions](07_interventions.md) — `scaffolder`, `random_scaffolder`, and `reflective_llm_scaffolder`.
 - [Run artifacts](08_artifacts.md) — files and columns written per run.
 
 ## For developers

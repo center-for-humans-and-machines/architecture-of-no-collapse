@@ -25,10 +25,11 @@ src/renewal/
     fake.py        # deterministic offline adapter
     embed.py       # EmbeddingClient + VllmEmbedding + FakeEmbedding
   interventions/
-    base.py        # Intervention protocol
+    base.py        # Intervention protocol + HistoryReplacement
     noop.py        # no-op plugin
     scaffolder/    # similarity-driven three-level scaffolder
     random_scaffolder/  # probability-driven sibling
+    reflective_llm_scaffolder/  # LLM-authored sibling (summarize + condense)
   metrics/
     base.py        # MetricTool, RunView, windowing, MetricRunner
     lexical.py     # lexical_diversity

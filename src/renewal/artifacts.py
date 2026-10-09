@@ -133,6 +133,21 @@ class RunRecorder:
             speaker=message.speaker,
         )
 
+    def condense(
+        self, *, since_turn: int, removed_turns: list[int]
+    ) -> None:
+        """Record that history from ``since_turn`` was replaced by a summary.
+
+        The dropped messages stay in the transcript; this event marks the
+        compression boundary so analysis can reconstruct what happened.
+        """
+        self._event(
+            "condense",
+            since_turn=since_turn,
+            removed=len(removed_turns),
+            removed_turns=removed_turns,
+        )
+
     def set_meta(self, **fields: Any) -> None:
         """Update one or more meta fields and persist immediately."""
         self._meta.update(fields)

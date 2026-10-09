@@ -48,10 +48,12 @@ The other run configs cover more of the harness:
 | `configs/smoke_metrics.yaml` | Offline fake LLM + fake embedding, all four metrics |
 | `configs/scaffolder_smoke.yaml` | Offline scaffolder (open topic and inject disabled) |
 | `configs/random_scaffolder_smoke.yaml` | Offline random scaffolder, `inject: 0.0` |
+| `configs/reflective_llm_scaffolder_smoke.yaml` | Offline reflective LLM scaffolder, `inject: 0.0` |
 | `configs/smoke_azure.yaml` | One Azure deployment, credentials from `.env` |
 | `configs/run_qwen.yaml` | A real 100-round Qwen run with metrics |
 | `configs/run_qwen_scaffolder.yaml` | Real run + similarity-driven scaffolder |
 | `configs/run_qwen_random_scaffolder.yaml` | Real run + random scaffolder |
+| `configs/run_qwen_reflective_llm_scaffolder.yaml` | Real run + LLM-driven reflective scaffolder |
 | `configs/run_qwen_no_scaffolding.yaml` | Control run with no intervention |
 | `configs/run_azure_random_scaffolder.yaml` | Azure agent + random scaffolder |
 | `configs/run_deepseek_random_scaffolder.yaml` | DeepSeek agent + random scaffolder |

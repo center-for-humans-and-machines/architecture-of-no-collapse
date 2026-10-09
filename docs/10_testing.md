@@ -23,6 +23,7 @@ Relevant files:
 | `test_embed.py` | Fake embedding determinism and vLLM request shaping |
 | `test_analyze.py` | Cross-run aggregation edge cases |
 | `test_scaffolder.py` / `test_random_scaffolder.py` | Policy levels, visibility, provenance |
+| `test_reflective_llm_scaffolder.py` | LLM steers, summarize/condense, history replacement |
 | `test_vllm.py` / `test_azure.py` | Endpoint/key resolution |
 | `test_viewer.py` | Viewer index and API behavior |
 

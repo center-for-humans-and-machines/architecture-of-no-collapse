@@ -10,6 +10,12 @@ prompt-scoped buffer: it is fed to the next agent's prompt and then dropped,
 never entering canonical history. The recorder receives every turn and
 intervention so a run leaves a complete transcript and event stream.
 
+An intervention may also return a :class:`HistoryReplacement` to *compress*
+history: the canonical history from a given turn on is dropped and replaced by
+the returned messages (see ``_apply_replacement``). The transcript stays
+complete and the metric windows are unaffected, because the loop keeps a
+separate ``turns`` list of every assistant turn it has seen.
+
 Agents need not see the whole history: when ``memory_turns`` is set, each
 prompt is built from only the most recent turns (see ``_recent``). The
 canonical history and recorder still keep everything.
@@ -23,7 +29,7 @@ from collections.abc import Awaitable, Callable
 from renewal.core.agent import Agent
 from renewal.core.message import Message
 from renewal.core.scheduler import Scheduler
-from renewal.interventions.base import Intervention
+from renewal.interventions.base import HistoryReplacement, Intervention
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,6 +55,10 @@ class Loop:
         self.memory_turns = memory_turns
         self.history: list[Message] = []
         self.transient: list[Message] = []
+        # Every assistant turn the loop has ever seen. Kept separate from
+        # ``history`` so a HistoryReplacement can compress the model context
+        # without corrupting the metric windows.
+        self.turns: list[Message] = []
 
     async def run(self, rounds: int) -> None:
         await self._prime()
@@ -64,6 +74,7 @@ class Loop:
                     position=position,
                 )
                 self.history.append(message)
+                self.turns.append(message)
                 self.recorder.turn(message)
                 self.transient.clear()
 
@@ -71,11 +82,10 @@ class Loop:
                     extra = await intervention.act(self.history)
                     if extra is None:
                         continue
-                    self.recorder.intervention(extra)
-                    if extra.transient:
-                        self.transient.append(extra)
+                    if isinstance(extra, HistoryReplacement):
+                        self._apply_replacement(extra)
                     else:
-                        self.history.append(extra)
+                        self._append(extra)
 
             if self.window_size is not None and self.on_window is not None:
                 if (round_index + 1) % self.window_size == 0:
@@ -126,11 +136,30 @@ class Loop:
             extra = await prime()
             if extra is None:
                 continue
-            self.recorder.intervention(extra)
-            if extra.transient:
-                self.transient.append(extra)
-            else:
-                self.history.append(extra)
+            self._append(extra)
+
+    def _append(self, message: Message) -> None:
+        """Record ``message`` and route it to history or the transient buffer."""
+        self.recorder.intervention(message)
+        if message.transient:
+            self.transient.append(message)
+        else:
+            self.history.append(message)
+
+    def _apply_replacement(self, replacement: HistoryReplacement) -> None:
+        """Drop history from ``replacement.since`` on and append the messages.
+
+        The dropped messages stay in the transcript; only the loop's in-memory
+        history (what the next agent sees) is compressed.
+        """
+        removed = [m for m in self.history if m.turn_index >= replacement.since]
+        self.history = [m for m in self.history if m.turn_index < replacement.since]
+        self.recorder.condense(
+            since_turn=replacement.since,
+            removed_turns=[m.turn_index for m in removed],
+        )
+        for message in replacement.messages:
+            self._append(message)
 
     async def _emit_window(self, round_index: int) -> None:
         assert self.window_size is not None and self.on_window is not None
@@ -139,7 +168,7 @@ class Loop:
         end = start + self.window_size
         turns = [
             m
-            for m in self.history
+            for m in self.turns
             if m.role == "assistant" and start <= m.meta.get("round", -1) < end
         ]
         await self.on_window(window_index, turns)
