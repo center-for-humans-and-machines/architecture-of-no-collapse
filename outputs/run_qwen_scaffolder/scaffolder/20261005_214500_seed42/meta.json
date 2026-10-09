@@ -1,0 +1,38 @@
+{
+  "embedding_model": "Qwen/Qwen3-Embedding-8B",
+  "error": "CancelledError: ",
+  "experiment_name": "run_qwen_scaffolder",
+  "finished_at": "2026-10-05T19:45:24+00:00",
+  "git_commit": "c93011cbbd954f5790565cc79d4d374a1de33561",
+  "git_dirty": true,
+  "labels": {
+    "condition": "scaffolder",
+    "experiment": "run_qwen_scaffolder",
+    "model": "Qwen3-30B-A3B-Instruct-2507"
+  },
+  "metrics_enabled": [
+    "lexical_diversity",
+    "semantic_anchor_sim",
+    "semantic_adjacent_sim",
+    "cross_run_sim"
+  ],
+  "metrics_status": "running",
+  "models": [
+    {
+      "model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+      "provider": "vllm"
+    }
+  ],
+  "n_agents": 1,
+  "python": "3.13.2",
+  "requires_env": [
+    "MPCDF_VLLM_ENDPOINT_URL",
+    "MPCDF_VLLM_MODEL"
+  ],
+  "rounds": 100,
+  "run_id": "63f08ca45636",
+  "seed": 42,
+  "started_at": "2026-10-05T19:45:00+00:00",
+  "status": "failed",
+  "window_size": 10
+}

@@ -1,0 +1,38 @@
+{
+  "embedding_model": "Qwen/Qwen3-Embedding-8B",
+  "experiment_name": "run_azure_random_scaffolder",
+  "finished_at": "2026-10-06T10:15:07+00:00",
+  "git_commit": "235e4f298c88ea572a14fbaea97c6576734a54bf",
+  "git_dirty": true,
+  "labels": {
+    "condition": "random_scaffolder",
+    "experiment": "run_azure_random_scaffolder",
+    "model": "gpt-4o-mini"
+  },
+  "metrics_enabled": [
+    "lexical_diversity",
+    "semantic_anchor_sim",
+    "semantic_adjacent_sim",
+    "cross_run_sim"
+  ],
+  "metrics_status": "completed",
+  "models": [
+    {
+      "model": "gpt-4o-mini",
+      "provider": "azure"
+    }
+  ],
+  "n_agents": 1,
+  "python": "3.13.2",
+  "requires_env": [
+    "AZURE_OPENAI_ENDPOINT",
+    "AZURE_OPENAI_API_KEY",
+    "AZURE_OPENAI_DEPLOYMENT"
+  ],
+  "rounds": 100,
+  "run_id": "0e3a5bc994a7",
+  "seed": 22,
+  "started_at": "2026-10-06T10:06:03+00:00",
+  "status": "completed",
+  "window_size": 10
+}

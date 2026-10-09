@@ -1,0 +1,48 @@
+# Real random-scaffolder run: run_qwen + independent random action sampling.
+# Tune the three probabilities to control how often the model is nudged to
+# deepen vs. innovate, and how often a brand-new topic is injected. Inject uses
+# Tavily (from .env).
+run:
+  rounds: 100
+  replicates: 1
+  seed: 5865
+  window_size: 10
+  memory_turns: 5
+
+agents:
+  n: 1
+  params:
+    temperature: 0.9
+    max_tokens: 500
+  pool:
+    - { provider: vllm, model: deepseek-ai/DeepSeek-V4-Flash }
+  prompt_source: prompts/prompts.yaml
+
+interventions:
+  - type: random_scaffolder
+    options:
+      max_excerpt_chars: 2000
+      probabilities:
+        deepen: 0.50
+        innovate: 0.40
+        inject: 0.10
+      visibility: injections
+      # Inject a grounded starting topic before turn 0 (uses Tavily).
+      open_with_topic: true
+
+metrics:
+  window_size: 10
+  embedding:
+    provider: vllm
+    model: Qwen/Qwen3-Embedding-8B
+  enabled: [lexical_diversity, semantic_anchor_sim, semantic_adjacent_sim, cross_run_sim]
+
+logging:
+  out_dir: outputs
+  experiment_name: run_qwen_random_scaffolder
+  labels:
+    experiment: run_qwen_random_scaffolder
+    model: Qwen3-30B-A3B-Instruct-2507
+    condition: random_scaffolder
+  console_level: INFO
+  file_level: DEBUG

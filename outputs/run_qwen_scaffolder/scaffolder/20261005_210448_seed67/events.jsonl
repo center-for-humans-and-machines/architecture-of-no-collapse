@@ -1,0 +1,2 @@
+{"run_id": "450151820fe3", "event": "run_started", "ts": "2026-10-05T19:04:48+00:00", "seed": 67, "rounds": 100}
+{"run_id": "450151820fe3", "event": "run_failed", "ts": "2026-10-05T19:04:50+00:00", "error": "GenerationExhaustedError: exhausted 3 generation attempt(s)"}

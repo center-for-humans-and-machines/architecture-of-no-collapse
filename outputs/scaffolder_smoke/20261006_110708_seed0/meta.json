@@ -1,0 +1,39 @@
+{
+  "embedding_model": "fake",
+  "experiment_name": "scaffolder_smoke",
+  "finished_at": "2026-10-06T09:08:52+00:00",
+  "git_commit": "310a9234ba42f8590fd57d93d1b12112d00b6b9c",
+  "git_dirty": true,
+  "labels": {
+    "experiment": "scaffolder_smoke"
+  },
+  "metrics_enabled": [
+    "lexical_diversity",
+    "semantic_anchor_sim",
+    "semantic_adjacent_sim"
+  ],
+  "metrics_status": "completed",
+  "models": [
+    {
+      "model": "fake",
+      "provider": "fake"
+    },
+    {
+      "model": "fake",
+      "provider": "fake"
+    },
+    {
+      "model": "fake",
+      "provider": "fake"
+    }
+  ],
+  "n_agents": 3,
+  "python": "3.13.2",
+  "requires_env": [],
+  "rounds": 30,
+  "run_id": "4d4576009381",
+  "seed": 0,
+  "started_at": "2026-10-06T09:07:08+00:00",
+  "status": "completed",
+  "window_size": 10
+}

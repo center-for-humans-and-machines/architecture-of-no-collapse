@@ -1,0 +1,9 @@
+{"run_id": "c5439d948207", "event": "run_started", "ts": "2026-10-06T08:19:45+00:00", "seed": 102, "rounds": 100}
+{"run_id": "c5439d948207", "event": "intervention", "ts": "2026-10-06T08:19:53+00:00", "turn_index": -1, "speaker": "random_scaffolder"}
+{"run_id": "c5439d948207", "event": "turn", "ts": "2026-10-06T08:19:55+00:00", "turn_index": 0, "round": 0, "position": 0, "speaker": "agent_0"}
+{"run_id": "c5439d948207", "event": "intervention", "ts": "2026-10-06T08:19:55+00:00", "turn_index": 0, "speaker": "random_scaffolder"}
+{"run_id": "c5439d948207", "event": "turn", "ts": "2026-10-06T08:19:55+00:00", "turn_index": 1, "round": 1, "position": 0, "speaker": "agent_0"}
+{"run_id": "c5439d948207", "event": "intervention", "ts": "2026-10-06T08:19:55+00:00", "turn_index": 1, "speaker": "random_scaffolder"}
+{"run_id": "c5439d948207", "event": "turn", "ts": "2026-10-06T08:19:57+00:00", "turn_index": 2, "round": 2, "position": 0, "speaker": "agent_0"}
+{"run_id": "c5439d948207", "event": "intervention", "ts": "2026-10-06T08:19:57+00:00", "turn_index": 2, "speaker": "random_scaffolder"}
+{"run_id": "c5439d948207", "event": "run_failed", "ts": "2026-10-06T08:19:57+00:00", "error": "CancelledError: "}

@@ -1,0 +1,52 @@
+run:
+  rounds: 30
+  replicates: 1
+  seed: 0
+  window_size: 10
+agents:
+  n: 3
+  params:
+    temperature: 0.9
+    max_tokens: 200
+    top_p: null
+    seed: null
+    frequency_penalty: null
+    presence_penalty: null
+  pool:
+  - provider: fake
+    model: fake
+  - provider: fake
+    model: fake
+  - provider: fake
+    model: fake
+  prompt_source: prompts/prompts.yaml
+  system_prompt: You are an agent in an open-ended multi-agent conversation.
+  prompts_override: {}
+interventions:
+- type: scaffolder
+  options:
+    threshold: 0.85
+    visibility: all
+    open_with_topic: false
+    embedding:
+      provider: fake
+      model: fake
+      dim: 64
+    seed: 0
+metrics:
+  window_size: 10
+  embedding:
+    provider: fake
+    model: fake
+    dim: 64
+  enabled:
+  - lexical_diversity
+  - semantic_anchor_sim
+  - semantic_adjacent_sim
+logging:
+  out_dir: outputs
+  experiment_name: scaffolder_smoke
+  labels:
+    experiment: scaffolder_smoke
+  console_level: INFO
+  file_level: DEBUG
