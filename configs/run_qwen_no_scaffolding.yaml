@@ -2,9 +2,9 @@
 # condition for the scaffolder runs, holding the run, agent, and metric
 # settings fixed so only the presence of steering differs.
 run:
-  rounds: 100
-  replicates: 1
-  seed: 101
+  rounds: 200
+  replicates: 5
+  seed: 0
   window_size: 10
   memory_turns: 5
 
