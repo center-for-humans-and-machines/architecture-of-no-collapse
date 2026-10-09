@@ -24,7 +24,13 @@ from renewal.config import RunConfig, load_run_config
 from renewal.core.agent import Agent
 from renewal.core.loop import Loop
 from renewal.core.scheduler import Scheduler
-from renewal.logging_setup import attach_file_log, configure_logging, detach_file_log
+from renewal.logging_setup import (
+    attach_file_log,
+    configure_logging,
+    detach_file_log,
+    run_log_scope,
+    run_scope_filter,
+)
 from renewal.metrics.analyze import run_analyze
 from renewal.metrics.base import build_metric_runner, enabled_metrics
 from renewal.prompts.loader import PromptSource
@@ -76,6 +82,7 @@ def build_interventions(config: RunConfig, seed: int) -> list:
 def _attach_llm_call_log(run_dir: Path) -> logging.Handler:
     handler = logging.FileHandler(run_dir / "llm_calls.jsonl", encoding="utf-8")
     handler.setFormatter(logging.Formatter("%(message)s"))
+    handler.addFilter(run_scope_filter(str(run_dir)))
     LLM_CALL_LOGGER.addHandler(handler)
     LLM_CALL_LOGGER.setLevel(logging.INFO)
     LLM_CALL_LOGGER.propagate = False
@@ -143,7 +150,7 @@ def _print_dry_run(config: RunConfig) -> None:
     print(f"experiment: {config.logging.experiment_name}")
     print(
         f"rounds: {config.run.rounds}  replicates: {config.run.replicates}  "
-        f"seed: {config.run.seed}"
+        f"parallel: {config.run.parallel or 'all'}  seed: {config.run.seed}"
     )
     memory = "unlimited" if config.run.memory_turns is None else config.run.memory_turns
     print(f"memory_turns: {memory}")
@@ -179,6 +186,100 @@ def main() -> None:
         _cmd_analyze(args)
 
 
+def _plan_replicates(
+    config: RunConfig,
+    out_dir: Path,
+    base_seed: int,
+    source_path: Path | None,
+) -> list[tuple[int, int, Path]]:
+    """Allocate one run directory per replicate and snapshot its inputs.
+
+    Directories are allocated (and inputs snapshotted) up front, before any
+    replicate starts, so the check-then-create in ``_unique_dir`` never runs
+    concurrently. Replicate ``i`` uses seed ``base_seed + i``.
+    """
+    plans: list[tuple[int, int, Path]] = []
+    for replicate in range(config.run.replicates):
+        seed = base_seed + replicate
+        run_dir = allocate_run_dir(
+            out_dir,
+            config.logging.experiment_name,
+            seed,
+            config.logging.labels,
+        )
+        snapshot_run_inputs(run_dir, config, source_path=source_path)
+        plans.append((replicate, seed, run_dir))
+    return plans
+
+
+async def _run_one_replicate(
+    config: RunConfig,
+    *,
+    replicate: int,
+    seed: int,
+    run_dir: Path,
+    debug: bool,
+    force_metrics: bool,
+    semaphore: asyncio.Semaphore,
+) -> Exception | None:
+    """Run one replicate under its own scoped file log.
+
+    Returns the exception if the replicate failed, else ``None``. A failure is
+    reported but never cancels sibling replicates.
+    """
+    key = str(run_dir)
+    async with semaphore:
+        handler = attach_file_log(
+            run_dir / "run.log",
+            config.logging.file_level,
+            run_key=key,
+        )
+        try:
+            with run_log_scope(key):
+                try:
+                    summary = await run_replicate(
+                        config,
+                        run_dir=run_dir,
+                        seed=seed,
+                        debug=debug,
+                        force_metrics=force_metrics,
+                    )
+                except Exception as error:  # noqa: BLE001 - report, keep siblings running
+                    LOGGER.error("replicate %s failed: %s", replicate, error)
+                    return error
+                LOGGER.info("replicate %s: %s", replicate, summary)
+                return None
+        finally:
+            detach_file_log(handler)
+
+
+async def _run_replicates(
+    config: RunConfig,
+    plans: list[tuple[int, int, Path]],
+    *,
+    debug: bool,
+    force_metrics: bool,
+) -> list[Exception]:
+    """Run every planned replicate concurrently, bounded by ``run.parallel``."""
+    limit = config.run.parallel or len(plans) or 1
+    semaphore = asyncio.Semaphore(limit)
+    results = await asyncio.gather(
+        *(
+            _run_one_replicate(
+                config,
+                replicate=replicate,
+                seed=seed,
+                run_dir=run_dir,
+                debug=debug,
+                force_metrics=force_metrics,
+                semaphore=semaphore,
+            )
+            for replicate, seed, run_dir in plans
+        )
+    )
+    return [error for error in results if error is not None]
+
+
 def _cmd_run(args) -> None:
     try:
         config = load_run_config(args.config)
@@ -200,29 +301,24 @@ def _cmd_run(args) -> None:
         config.run.rounds,
         config.run.replicates,
     )
-    for replicate in range(config.run.replicates):
-        seed = base_seed + replicate
-        run_dir = allocate_run_dir(
-            out_dir,
-            config.logging.experiment_name,
-            seed,
-            config.logging.labels,
+    plans = _plan_replicates(config, out_dir, base_seed, args.config)
+    concurrency = config.run.parallel or len(plans)
+    LOGGER.info(
+        "running %s replicate(s), max concurrency %s",
+        len(plans),
+        concurrency,
+    )
+    failures = asyncio.run(
+        _run_replicates(
+            config,
+            plans,
+            debug=args.debug,
+            force_metrics=args.metrics,
         )
-        snapshot_run_inputs(run_dir, config, source_path=args.config)
-        file_handler = attach_file_log(run_dir / "run.log", config.logging.file_level)
-        try:
-            summary = asyncio.run(
-                run_replicate(
-                    config,
-                    run_dir=run_dir,
-                    seed=seed,
-                    debug=args.debug,
-                    force_metrics=args.metrics,
-                )
-            )
-            LOGGER.info("replicate %s: %s", replicate, summary)
-        finally:
-            detach_file_log(file_handler)
+    )
+    if failures:
+        LOGGER.error("%s replicate(s) failed", len(failures))
+        raise SystemExit(1)
 
 
 def _cmd_analyze(args) -> None:

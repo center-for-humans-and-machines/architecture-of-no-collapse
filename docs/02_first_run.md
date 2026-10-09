@@ -73,7 +73,8 @@ outputs/<experiment_name>/<condition>/<timestamp>_seed<N>/
 
 When `run.replicates > 1`, each replicate gets its own sibling directory with
 `seed = run.seed + replicate`. Every artifact is documented in
-[Run artifacts](08_artifacts.md).
+[Run artifacts](08_artifacts.md). Replicates run concurrently by default; set
+`run.parallel` to cap how many run at once.
 
 `--out DIR` overrides `logging.out_dir`; `--seed N` overrides `run.seed`.
 

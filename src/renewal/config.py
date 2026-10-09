@@ -38,6 +38,8 @@ class RunSettings(BaseModel):
 
     rounds: int = Field(default=200, ge=1)
     replicates: int = Field(default=1, ge=1)
+    # Max replicates to run at once; ``None`` runs every replicate concurrently.
+    parallel: int | None = Field(default=None, ge=1)
     seed: int = 0
     window_size: int = Field(default=10, ge=1)
     # Agents see only the last ``memory_turns`` agent turns in their prompt.

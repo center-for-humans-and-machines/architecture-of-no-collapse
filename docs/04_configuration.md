@@ -9,6 +9,7 @@ than being silently ignored. A config has five top-level blocks: `run`,
 run:
   rounds: 100          # number of rounds (each round = one pass over all agents)
   replicates: 1        # independent runs, seeds seed, seed+1, ...
+  parallel: null       # max replicates at once; null runs them all concurrently
   seed: 67             # base RNG seed
   window_size: 10      # metric window width, in rounds
   memory_turns: 20     # prompt-only history window, or null for no forgetting
@@ -46,7 +47,8 @@ logging:
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |
 | `rounds` | int ≥ 1 | `200` | Number of rounds. A round is one randomized pass over all agents, so `N` agents produce `N × rounds` turns. |
-| `replicates` | int ≥ 1 | `1` | Number of independent runs. Replicate `i` uses seed `seed + i` and its own output directory. |
+| `replicates` | int ≥ 1 | `1` | Number of independent runs. Replicate `i` uses seed `seed + i` and its own output directory. Replicates run concurrently. |
+| `parallel` | int ≥ 1 or `null` | `null` | Maximum number of replicates running at once. `null` runs every replicate concurrently. Use a cap to avoid overloading the model endpoint. |
 | `seed` | int | `0` | Base seed for the scheduler, prompt assignment, and seed-using interventions. |
 | `window_size` | int ≥ 1 | `10` | Metric window width, **in rounds**, for Kong comparability. |
 | `memory_turns` | int ≥ 1 or `null` | `20` | How many recent agent turns each agent sees in its prompt. `null` disables forgetting. See [Memory](#memory). |
