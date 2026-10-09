@@ -132,7 +132,10 @@ and innovation wordings. Each accepts either a path to a YAML file of
 list of strings; omit them to keep the built-in families. For example,
 `configs/run_qwen_random_scaffolder_socratic.yaml` sets `deepen_prompts:
 prompts/socratic_question.yaml` to draw from a curated, non-LLM Socratic
-question bank while leaving `innovate` unchanged.
+question bank while leaving `innovate` unchanged, and
+`configs/run_qwen_random_scaffolder_innovate.yaml` sets `innovate_prompts:
+prompts/innovate_prompts.yaml` (a merge of several published creativity decks)
+while leaving `deepen` unchanged.
 
 Offline smoke (fake LLM, inject disabled so no Tavily call):
 

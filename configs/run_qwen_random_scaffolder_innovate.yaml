@@ -1,0 +1,52 @@
+# Ablation: run_qwen + random_scaffolder, but the `innovate` level draws from the
+# curated, non-LLM innovation prompt bank (prompts/innovate_prompts.yaml)
+# instead of the four built-in INNOVATE_PROMPTS. Everything else matches
+# configs/run_qwen_random_scaffolder.yaml, so the two runs differ only in the
+# innovate wording source. Inject uses Tavily (from .env).
+run:
+  rounds: 200
+  replicates: 5
+  seed: 0
+  window_size: 10
+  memory_turns: 5
+
+agents:
+  n: 1
+  params:
+    temperature: 0.9
+    max_tokens: 500
+  pool:
+    - { provider: vllm, model: Qwen/Qwen3-30B-A3B-Instruct-2507 }
+  prompt_source: prompts/prompts.yaml
+
+interventions:
+  - type: random_scaffolder
+    options:
+      probabilities:
+        deepen: 0.50
+        innovate: 0.40
+        inject: 0.10
+      visibility: injections
+      # Inject a grounded starting topic before turn 0 (uses Tavily).
+      open_with_topic: true
+      # Curated innovate prompts: merged Oblique Strategies, Thinker's Keys,
+      # Whack Pack, SCAMPER and modern move-sets. Path is relative to the repo
+      # root, like prompt_source.
+      innovate_prompts: prompts/innovate_prompts.yaml
+
+metrics:
+  window_size: 10
+  embedding:
+    provider: vllm
+    model: Qwen/Qwen3-Embedding-8B
+  enabled: [lexical_diversity, semantic_anchor_sim, semantic_adjacent_sim, cross_run_sim]
+
+logging:
+  out_dir: outputs
+  experiment_name: run_qwen_random_scaffolder_innovate
+  labels:
+    experiment: run_qwen_random_scaffolder_innovate
+    model: Qwen3-30B-A3B-Instruct-2507
+    condition: random_scaffolder_innovate
+  console_level: INFO
+  file_level: DEBUG

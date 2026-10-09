@@ -54,6 +54,8 @@ The other run configs cover more of the harness:
 | `configs/run_qwen_scaffolder.yaml` | Real run + similarity-driven scaffolder |
 | `configs/run_qwen_random_scaffolder.yaml` | Real run + random scaffolder |
 | `configs/run_qwen_random_scaffolder_socratic.yaml` | Same, but the `deepen` level draws from the Socratic question bank |
+| `configs/run_qwen_random_scaffolder_innovate.yaml` | Same, but the `innovate` level draws from the combined innovation bank |
+| `configs/run_qwen_random_scaffolder_curated.yaml` | Same, but both `deepen` and `innovate` draw from the curated banks |
 | `configs/run_qwen_reflective_llm_scaffolder.yaml` | Real run + LLM-driven reflective scaffolder |
 | `configs/run_qwen_no_scaffolding.yaml` | Control run with no intervention |
 | `configs/run_azure_random_scaffolder.yaml` | Azure agent + random scaffolder |

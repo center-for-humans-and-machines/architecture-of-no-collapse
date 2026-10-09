@@ -1,0 +1,174 @@
+# Combined innovation prompt bank, for the scaffolder's `innovate` level.
+#
+# Merged from every non-LLM deck/set found while sourcing. Entries are grouped by
+# the `source` key so whole sections can be pruned or rewritten in place. This
+# file is a raw transcription of published sources (no generated prompts); treat
+# it as a starting point to curate by hand.
+#
+# Sources and licenses:
+#   oblique_strategies - Brian Eno & Peter Schmidt (1975), "Over One Hundred
+#       Worthwhile Dilemmas". (c) Eno/Schmidt; attributed/adapted use.
+#       https://www.mit.edu/~mcanulty/oblique.strategies.html
+#   scamper - SCAMPER / Osborn idea-spurring questions, via SmartStorming's
+#       "50 SCAMPER Questions". (c) SmartStorming. Object/product-oriented:
+#       this is the section to prune first for a text/ideas conversation.
+#   thinkers_keys - Tony Ryan's 20 Thinker's Keys. (c) Tony Ryan.
+#       https://www.thinkerskeys.com/
+#   creative_whack_pack - Roger von Oech's 64-card deck. (c) U.S. Games.
+#       Partial: only the publicly documented card titles are listed here.
+#   generative_moves - modern move-sets from the Apache-2.0 "generative-thinking"
+#       skill and the "divergent ideation" family. Compact by nature.
+#
+# Format matches prompts/prompts.yaml: a list of {id, text}. `source` is
+# informational only (renewal.prompts.loader ignores extra keys).
+
+# --- oblique_strategies ----------------------------------------------------
+
+- id: oblique_001
+  source: oblique_strategies
+  text: Remove any specific detail from the ideas we discussed so far and convert everythng into ambiguities as good as possible.
+- id: oblique_002
+  source: oblique_strategies
+  text: Don't be frightened of cliches, try to write everything down in as much cliches as possible.
+- id: oblique_008
+  source: oblique_strategies
+  text: List all the important elements of the topic we discussed so far. Subtract an element and think how it would look like without it.
+- id: oblique_012
+  source: oblique_strategies
+  text: Make an exhaustive list of everything you might think about next & do the last thing on the list.
+- id: oblique_018
+  source: oblique_strategies
+  text: What thoughts are into our topic so far? What do they do for the topic? Please switch them around and think how this would change everything.
+- id: oblique_020
+  source: oblique_strategies
+  text: Do not think about what would be desirable, instead try to be completely rational about everything and restate what changed.
+- id: oblique_022
+  source: oblique_strategies
+  text: Which choice do we have to make given the topic? Please think about how the subject would change, if we had to implement both choices.
+- id: oblique_033
+  source: oblique_strategies
+  text: How would a completely 'unqualified' person look at what we said so far? Please put their perspective into the discussion.
+- id: oblique_036
+  source: oblique_strategies
+  text: Please do nothing for as long as possible next, instead of going further down the line we already have taken.
+
+- id: scamper_007
+  source: scamper
+  text: What are the most obvious things that can be substituted from this idea?
+- id: scamper_010
+  source: scamper
+  text: What two or more ideas from everything we discussed can be combined into a new topic?
+
+# --- thinkers_keys (Tony Ryan, 20 keys) ------------------------------------
+
+- id: key_001
+  source: thinkers_keys
+  text: What can never or would never happen given the idea we explored so far?
+- id: key_002
+  source: thinkers_keys
+  text: Please pose a what-if question about the conversation that opens new solutions.
+- id: key_003
+  source: thinkers_keys
+  text: List the disadvantages and propose improvements about our idea.
+- id: key_004
+  source: thinkers_keys
+  text: List the attributes of our idea and an random other idea you can come up with, then combine them.
+- id: key_005
+  source: thinkers_keys
+  text: Come up with something new for 6 random letters of the alphabet and add it to our idea.
+- id: key_008
+  source: thinkers_keys
+  text: Draw a picture (mentally) that links to the topic.
+- id: key_009
+  source: thinkers_keys
+  text: Predict a possible outcome of this situation.
+- id: key_010
+  source: thinkers_keys
+  text: Find ten different uses for this and pick the last one to continue.
+- id: key_012
+  source: thinkers_keys
+  text: Find common points between all the ideas we discussed so far.
+- id: key_013
+  source: thinkers_keys
+  text: Come up with five new questions about this.
+- id: key_014
+  source: thinkers_keys
+  text: Brainstorm about the topic at hand to find a new angle.
+- id: key_016
+  source: thinkers_keys
+  text: Find alternatives to an idea treated as fixed that connects to this topic.
+- id: key_020
+  source: thinkers_keys
+  text: Give three possible new interpretations of this and connect them.
+
+# --- creative_whack_pack (documented card titles only) ---------------------
+
+- id: whack_001
+  source: creative_whack_pack
+  text: Please give our whole topic a new name and think about how this new name changes stuff.
+- id: whack_002
+  source: creative_whack_pack
+  text: Come up with a random new idea and connect it to our topic at hand.
+- id: whack_003
+  source: creative_whack_pack
+  text: Think like a grandma — embrace a ancient mindset and rethink what we discussed so far.
+- id: whack_004
+  source: creative_whack_pack
+  text: Reverse everything about the topic we discussed so far. How would it look different, what new thoughts come to mind?
+- id: whack_005
+  source: creative_whack_pack
+  text: Think like a kid — embrace a childlike mindset and rethink what we discussed so far.
+- id: whack_006
+  source: creative_whack_pack
+  text: Slay a sacred cow — challenge a belief that shouldn't be touched in regard to our topic. What does this change
+- id: whack_007
+  source: creative_whack_pack
+  text: Slay a dragon — What do you fear about the topic at hand? Try to think about how it would look like, if you ignored the fear.
+- id: whack_008
+  source: creative_whack_pack
+  text: Look for the second right answer to this question or topic.
+- id: whack_009
+  source: creative_whack_pack
+  text: Make a metaphor for what we discussed so far.
+
+# --- generative_moves (modern move-sets) -----------------------------------
+
+- id: move_001
+  source: generative_moves
+  text: Reframe — change the verb, subject, scope, or level
+- id: move_002
+  source: generative_moves
+  text: Provocation — state something impossible, then extract what it suggests
+- id: move_003
+  source: generative_moves
+  text: Random stimulus — force an unrelated concept into the frame
+- id: move_004
+  source: generative_moves
+  text: Inversion — ask how to guarantee failure, then negate it
+- id: move_005
+  source: generative_moves
+  text: Perspective shift — how would a distant domain solve this?
+- id: move_006
+  source: generative_moves
+  text: Constraint play — remove a constraint, or add an absurd one. How does this change what the topic look like?
+- id: move_007
+  source: generative_moves
+  text: Family traversal — name the shared family and walk it to its limits
+- id: move_008
+  source: generative_moves
+  text: Question burst — generate questions only, then pick the most catalytic one
+- id: move_009
+  source: generative_moves
+  text: Assumption reversal — negate a load-bearing assumption and generate from the reversed world
+- id: move_010
+  source: generative_moves
+  text: Far-analogy — map the deep structure to a distant domain and transfer the mechanism
+- id: move_011
+  source: generative_moves
+  text: Brainwriting — build several independent idea streams without anchoring on the first
+- id: move_012
+  source: generative_moves
+  text: Abstraction laddering — generalize up, then specialize down
+- id: move_013
+  source: generative_moves
+  text: Janusian thinking — hold two opposites at once and synthesize rather than pick a side
