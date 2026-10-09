@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from viewer.backend.index import (
+    MEMORIES_FILENAME,
     META_FILENAME,
     METRICS_FILENAME,
     TRANSCRIPT_FILENAME,
@@ -104,6 +105,57 @@ def read_meta(run_dir: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def read_memories(run_dir: Path) -> list[dict[str, Any]]:
+    """Reconstruct the memory set from the append-only ``memories.jsonl``.
+
+    ``memory_created`` lines carry the full record; each later
+    ``memory_surfaced`` line bumps the count and records the turn. The embedding
+    vectors are summarized to their dimension rather than shipped to the client.
+    """
+    path = run_dir / MEMORIES_FILENAME
+    if not path.exists():
+        return []
+    memories: dict[int, dict[str, Any]] = {}
+    order: list[int] = []
+    with path.open(encoding="utf-8") as stream:
+        for line in stream:
+            line = line.strip()
+            if not line:
+                continue
+            record = json.loads(line)
+            event = record.get("event")
+            memory_id = record.get("id")
+            if memory_id is None:
+                continue
+            if event == "memory_created":
+                embedding = record.get("embedding")
+                memories[memory_id] = {
+                    "id": memory_id,
+                    "text": record.get("text"),
+                    "created_turn": record.get("created_turn"),
+                    "since_turn": record.get("since_turn"),
+                    "surfaced_count": record.get("surfaced_count", 0),
+                    "last_surfaced_turn": record.get("last_surfaced_turn"),
+                    "surfaced_turns": [],
+                    "provenance": record.get("provenance") or {},
+                    "embedding_dim": len(embedding) if embedding else None,
+                    "selector": record.get("selector"),
+                }
+                order.append(memory_id)
+            elif event == "memory_surfaced" and memory_id in memories:
+                memory = memories[memory_id]
+                memory["surfaced_count"] = record.get(
+                    "surfaced_count", memory["surfaced_count"]
+                )
+                memory["last_surfaced_turn"] = record.get(
+                    "last_surfaced_turn", memory["last_surfaced_turn"]
+                )
+                turn_index = record.get("turn_index")
+                if turn_index is not None:
+                    memory["surfaced_turns"].append(turn_index)
+    return [memories[memory_id] for memory_id in order]
 
 
 def _model_names(summary: RunSummary) -> list[str]:
@@ -214,6 +266,10 @@ def create_app(base_dir: Path) -> FastAPI:
     @app.get("/api/runs/{run_id}/metrics")
     def metrics(run_id: str) -> list[dict[str, Any]]:
         return read_metrics(index.run_dir(run_id))
+
+    @app.get("/api/runs/{run_id}/memories")
+    def memories(run_id: str) -> list[dict[str, Any]]:
+        return read_memories(index.run_dir(run_id))
 
     @app.get("/api/runs/{run_id}/meta")
     def meta(run_id: str) -> dict[str, Any]:

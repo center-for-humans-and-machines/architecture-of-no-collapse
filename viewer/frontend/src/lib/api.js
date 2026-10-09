@@ -23,6 +23,7 @@ export const api = {
   runs: (filters) => getJSON('/api/runs', filters),
   transcript: (id) => getJSON(`/api/runs/${id}/transcript`),
   metrics: (id) => getJSON(`/api/runs/${id}/metrics`),
+  memories: (id) => getJSON(`/api/runs/${id}/memories`),
   meta: (id) => getJSON(`/api/runs/${id}/meta`),
 };
 

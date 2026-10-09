@@ -158,3 +158,60 @@ def test_unknown_run_is_404(tmp_path):
     client = TestClient(create_app(tmp_path / "outputs"))
     resp = client.get("/api/runs/nope/metrics")
     assert resp.status_code == 404
+
+
+def test_memories_endpoint_reconstructs_from_events(tmp_path):
+    base = tmp_path / "outputs"
+    run_dir = base / "e" / "run"
+    _write_run(run_dir, run_id="r1")
+    lines = [
+        {
+            "run_id": "r1", "event": "memory_created", "id": 1,
+            "text": "first memory", "created_turn": 0, "since_turn": 0,
+            "surfaced_count": 0, "last_surfaced_turn": None,
+            "provenance": {"words": ["a", "b"]}, "embedding": [0.1, 0.2, 0.3],
+            "selector": "random_unsurfaced",
+        },
+        {
+            "run_id": "r1", "event": "memory_created", "id": 2,
+            "text": "second memory", "created_turn": 3, "since_turn": 1,
+            "surfaced_count": 0, "last_surfaced_turn": None,
+            "provenance": {}, "embedding": None,
+            "selector": "random_unsurfaced",
+        },
+        {
+            "run_id": "r1", "event": "memory_surfaced", "id": 1,
+            "turn_index": 5, "surfaced_count": 1, "last_surfaced_turn": 5,
+            "selector": "random_unsurfaced",
+        },
+        {
+            "run_id": "r1", "event": "memory_surfaced", "id": 1,
+            "turn_index": 9, "surfaced_count": 2, "last_surfaced_turn": 9,
+            "selector": "random_unsurfaced",
+        },
+    ]
+    (run_dir / "memories.jsonl").write_text(
+        "\n".join(json.dumps(line) for line in lines) + "\n"
+    )
+    client = TestClient(create_app(base))
+    resp = client.get("/api/runs/r1/memories")
+    assert resp.status_code == 200
+    memories = resp.json()
+    assert [m["id"] for m in memories] == [1, 2]
+    first = memories[0]
+    assert first["text"] == "first memory"
+    assert first["surfaced_count"] == 2
+    assert first["last_surfaced_turn"] == 9
+    assert first["surfaced_turns"] == [5, 9]
+    assert first["embedding_dim"] == 3
+    assert first["provenance"] == {"words": ["a", "b"]}
+    assert memories[1]["embedding_dim"] is None
+
+
+def test_memories_endpoint_empty_without_file(tmp_path):
+    base = tmp_path / "outputs"
+    _write_run(base / "e" / "run", run_id="r1")
+    client = TestClient(create_app(base))
+    resp = client.get("/api/runs/r1/memories")
+    assert resp.status_code == 200
+    assert resp.json() == []

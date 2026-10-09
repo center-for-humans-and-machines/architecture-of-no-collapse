@@ -4,12 +4,13 @@ An intervention is a plug-in that appends steering messages to the conversation.
 The loop applies the configured interventions in order after every agent turn,
 and each intervention may also inject an opening message before turn 0. Several
 interventions ship with the harness (`noop`, `scaffolder`, `random_scaffolder`,
-`reflective_llm_scaffolder`); an empty `interventions` list runs a bare
-conversation.
+`reflective_llm_scaffolder`, `memory_scaffolder`); an empty `interventions` list
+runs a bare conversation.
 
-The three scaffolders share the same three levels. `scaffolder` and
+The scaffolders share the same three levels. `scaffolder` and
 `random_scaffolder` steer with fixed prompt families; `reflective_llm_scaffolder`
-has an LLM author them at runtime.
+has an LLM author them at runtime; `memory_scaffolder` adds a fourth level that
+resurfaces a stored memory.
 
 | Level | Prompt family (fixed scaffolders) |
 | --- | --- |
@@ -209,3 +210,81 @@ poetry run renewal run configs/reflective_llm_scaffolder_smoke.yaml
 
 A live run is `configs/run_qwen_reflective_llm_scaffolder.yaml`, which needs
 `TAVILY_API_KEY` (only when inject fires).
+
+## `memory_scaffolder`
+
+A sibling of `reflective_llm_scaffolder` (its package is a self-contained copy)
+that adds a fourth action, **`resurface`**, and remembers the topics that end.
+It is meant for runs where the loop forgets (`run.memory_turns`) and earlier
+context is otherwise lost.
+
+Each turn the policy independently draws one of **four** actions:
+
+| Level | Behavior |
+| --- | --- |
+| `deepen` | Scaffolding LLM authors a deepening steer (as reflective). |
+| `innovate` | Scaffolding LLM authors an innovation steer (as reflective). |
+| `inject` | Summarize the searched source, introduce a new topic, and store a memory first. |
+| `resurface` | Bring back one stored memory and ask the model to connect it to the current topic. |
+
+**Memories.** Just before a new topic is introduced, the scaffolding LLM
+summarizes the topic that is ending — everything since the last topic, at the
+looping model's `max_tokens` — and stores the summary as a `Memory`. Unlike the
+reflective scaffolder's `condense`, remembering never replaces history; it only
+saves a copy for later. A `Memory` keeps a sequential `id`, its `text`, a
+unit-norm `embedding`, `surfaced_count`, `last_surfaced_turn`, the turn range it
+was distilled from, and provenance. The resurface action selects a memory, renders
+one of the `RESURFACE_PROMPTS` (five fixed templates that insert the memory and
+ask how it is relevant), marks it surfaced, and emits it as a steering message.
+With the first `~` inject-only start there are no memories, so an early resurface
+draw is a no-op.
+
+The first selection algorithm, `random_unsurfaced`, surfaces a memory that has
+never been surfaced, uniformly at random; once every memory has been seen at
+least once it falls back to the least-surfaced ones. The store is built around a
+`MemorySelector` protocol so future algorithms (e.g. embedding similarity to the
+current turn) can be dropped in.
+
+```yaml
+interventions:
+  - type: memory_scaffolder
+    options:
+      probabilities: { deepen: 0.50, innovate: 0.30, inject: 0.10, resurface: 0.10 }
+      visibility: injections
+      open_with_topic: true
+      llm: { provider: vllm, model: Qwen/Qwen3-30B-A3B-Instruct-2507 }
+      embedding: { provider: vllm, model: Qwen/Qwen3-Embedding-8B }  # memory vectors
+      summarize: { enabled: true }
+      remember:  { enabled: true }
+```
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `probabilities` | deepen 0.80 / innovate 0.05 / inject 0.05 / resurface 0.10 | Four-way action distribution; must sum to 1. |
+| `visibility` | `all` | `all` / `injections` / `transient`. |
+| `open_with_topic` | `true` | Infuse a summarized opening topic before turn 0 (no memory is created). |
+| `llm` | fake | The shared scaffolding LLM: `{ provider: vllm|azure|fake, model }`. |
+| `embedding` | fake, dim 64 | Embedder for stored memories: `{ provider: vllm|fake, model, dim }`. |
+| `deepen` / `innovate` | enabled, `history_turns: 1` | `{ enabled, system_prompt, history_turns }`. |
+| `summarize` | enabled | `{ enabled, system_prompt }`; the prompt may use `{max_tokens}`. |
+| `remember` | enabled, `history_turns: null` | `{ enabled, system_prompt, history_turns }`; the memory summary prompt. |
+| `resurface_prompts` | 5 built-ins | Path to a YAML `{id, text}` file or an inline list; each template uses `{memory}`. |
+| `generation` | temp 0.9, max 200 | Scaffold-LLM decode params (summarize/remember override `max_tokens`). |
+| `max_excerpt_chars` | `800` | Cap on the raw excerpt when summarization is off or fails. |
+| `num_words`, `search_top_k`, `search_depth`, `search_timeout` | as `reflective_llm_scaffolder` | Tavily injection knobs. |
+
+The run harness injects the seed, the looping `max_tokens`, and the recorder
+(via `uses_run_seed` / `uses_loop_max_tokens` / `uses_memory_sink`). Every
+`memory_created` / `memory_surfaced` event is appended to `memories.jsonl` in the
+run directory (see [Run artifacts](08_artifacts.md)) and can be browsed in the
+[viewer](03_viewer.md) **Memories** tab.
+
+Offline smoke (fake LLM + fake embedder, inject disabled so no Tavily call):
+
+```bash
+poetry run renewal run configs/memory_scaffolder_smoke.yaml
+```
+
+Live runs: `configs/run_qwen_memory_scaffolder.yaml` and
+`configs/run_4o-mini_memory_scaffolder.yaml`, which need `TAVILY_API_KEY` (only
+when inject fires).

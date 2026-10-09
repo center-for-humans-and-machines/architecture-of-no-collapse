@@ -1,0 +1,51 @@
+# Live memory-scaffolder run: gpt-4o-mini + a fourth `resurface` action.
+# Same setup as configs/run_qwen_memory_scaffolder.yaml, but the looping and
+# scaffolding model is Azure gpt-4o-mini. Inject uses Tavily (from .env).
+# Memories are written to memories.jsonl for offline inspection.
+run:
+  rounds: 150
+  replicates: 2
+  seed: 0
+  window_size: 10
+  memory_turns: 5
+
+agents:
+  n: 1
+  params:
+    temperature: 1.2
+    max_tokens: 500
+  pool:
+    - { provider: azure, model: gpt-4o-mini }
+  prompt_source: prompts/prompts.yaml
+
+interventions:
+  - type: memory_scaffolder
+    options:
+      probabilities:
+        deepen: 0.50
+        innovate: 0.30
+        inject: 0.10
+        resurface: 0.10
+      visibility: injections
+      open_with_topic: true
+      llm: { provider: azure, model: gpt-4o-mini }
+      embedding: { provider: vllm, model: Qwen/Qwen3-Embedding-8B }
+      summarize: { enabled: true }
+      remember: { enabled: true }
+
+metrics:
+  window_size: 10
+  embedding:
+    provider: vllm
+    model: Qwen/Qwen3-Embedding-8B
+  enabled: [lexical_diversity, semantic_anchor_sim, semantic_adjacent_sim, cross_run_sim]
+
+logging:
+  out_dir: outputs
+  experiment_name: run_4o-mini_memory_scaffolder
+  labels:
+    experiment: run_4o-mini_memory_scaffolder
+    model: gpt-4o-mini
+    condition: memory_scaffolder
+  console_level: INFO
+  file_level: DEBUG

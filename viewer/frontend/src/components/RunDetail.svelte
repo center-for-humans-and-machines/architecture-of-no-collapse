@@ -1,6 +1,7 @@
 <script>
   import { api } from '../lib/api.js';
   import Conversation from './Conversation.svelte';
+  import Memories from './Memories.svelte';
   import MetricsTable from './MetricsTable.svelte';
 
   let { runId } = $props();
@@ -8,6 +9,7 @@
   let tab = $state('conversation');
   let transcript = $state([]);
   let metrics = $state([]);
+  let memories = $state([]);
   let meta = $state(null);
 
   $effect(() => {
@@ -15,7 +17,7 @@
     api.meta(runId).then((m) => (meta = m)).catch(console.error);
   });
 
-  // Poll metrics while the detail is open so running runs extend live.
+  // Poll metrics and memories while the detail is open so running runs extend live.
   $effect(() => {
     const load = () => api.metrics(runId).then((m) => (metrics = m)).catch(console.error);
     load();
@@ -23,7 +25,18 @@
     return () => clearInterval(id);
   });
 
-  const tabs = ['conversation', 'metrics'];
+  $effect(() => {
+    const load = () => api.memories(runId).then((m) => (memories = m)).catch(console.error);
+    load();
+    const id = setInterval(load, 1500);
+    return () => clearInterval(id);
+  });
+
+  let tabs = $derived(
+    memories.length > 0
+      ? ['conversation', 'metrics', 'memories']
+      : ['conversation', 'metrics']
+  );
 </script>
 
 <div class="detail">
@@ -44,6 +57,8 @@
     <Conversation messages={transcript} />
   {:else if tab === 'metrics'}
     <MetricsTable {metrics} />
+  {:else if tab === 'memories'}
+    <Memories {memories} />
   {/if}
 </div>
 

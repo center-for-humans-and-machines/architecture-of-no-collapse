@@ -57,6 +57,10 @@ Opening a run shows the single-run view, which has its own tabs:
 1. **Conversation** — the full transcript in order, one message per block, with
    `intervention` blocks inset in orange.
 2. **Metrics table** — one row per window, one column per metric.
+3. **Memories** — present only when the run wrote `memories.jsonl` (the
+   `memory_scaffolder`). One block per stored memory, showing its summary, the
+   turn it was created, how often and when it was resurfaced, and its source
+   provenance (the embedding is shown only as a dimension). Updates live.
 
 ## Production
 

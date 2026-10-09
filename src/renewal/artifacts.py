@@ -29,6 +29,7 @@ LOGGER = logging.getLogger(__name__)
 
 TRANSCRIPT_FILENAME = "transcript.jsonl"
 EVENTS_FILENAME = "events.jsonl"
+MEMORIES_FILENAME = "memories.jsonl"
 META_FILENAME = "meta.json"
 SOURCE_CONFIG_FILENAME = "config.yaml"
 RESOLVED_CONFIG_FILENAME = "resolved_config.yaml"
@@ -106,6 +107,7 @@ class RunRecorder:
         self.run_id = run_id or uuid.uuid4().hex[:12]
         self._transcript_path = run_dir / TRANSCRIPT_FILENAME
         self._events_path = run_dir / EVENTS_FILENAME
+        self._memories_path = run_dir / MEMORIES_FILENAME
         self._meta_path = run_dir / META_FILENAME
         self._meta: dict[str, Any] = {}
 
@@ -147,6 +149,19 @@ class RunRecorder:
             removed=len(removed_turns),
             removed_turns=removed_turns,
         )
+
+    def record_memory(self, event: str, **fields: Any) -> None:
+        """Append one memory event to ``memories.jsonl``.
+
+        This is the sink the memory scaffolder reports to: a ``memory_created``
+        line carries the full record (text, embedding, provenance) and a
+        ``memory_surfaced`` line notes a resurfacing. The file is append-only so
+        a crashed run keeps its partial memory set; the current state of any
+        memory is its created record plus its later surfaced events.
+        """
+        record = {"run_id": self.run_id, "event": event, "ts": _now(), **fields}
+        with self._memories_path.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     def set_meta(self, **fields: Any) -> None:
         """Update one or more meta fields and persist immediately."""

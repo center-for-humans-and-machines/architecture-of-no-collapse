@@ -1,0 +1,57 @@
+# Offline memory-scaffolder smoke: fake looping model, fake scaffolding LLM,
+# fake memory embedder — no network or keys.
+# The policy draws deepen / innovate / inject / resurface independently each
+# turn. Inject is disabled (0.0) so no Tavily call is made; with inject off no
+# memory is ever created, so resurface fires but is a no-op. Set inject > 0 /
+# open_with_topic true to exercise the search + summarize + remember + resurface
+# path (needs TAVILY_API_KEY).
+run:
+  rounds: 100
+  replicates: 1
+  seed: 0
+  window_size: 10
+  memory_turns: 5
+
+agents:
+  n: 3
+  params:
+    temperature: 0.9
+    max_tokens: 200
+  pool:
+    - { provider: fake, model: fake }
+    - { provider: fake, model: fake }
+    - { provider: fake, model: fake }
+  prompt_source: prompts/prompts.yaml
+
+interventions:
+  - type: memory_scaffolder
+    options:
+      probabilities:
+        deepen: 0.50
+        innovate: 0.40
+        inject: 0.00
+        resurface: 0.10
+      visibility: all
+      # Keep the smoke offline: priming would sample common words and search.
+      open_with_topic: false
+      # The shared scaffolding LLM; fake keeps the run deterministic/offline.
+      llm: { provider: fake, model: fake }
+      # Fake embedder for the memory store.
+      embedding: { provider: fake, model: fake, dim: 64 }
+      summarize: { enabled: true }
+      remember: { enabled: true }
+
+metrics:
+  window_size: 10
+  embedding:
+    provider: fake
+    model: fake
+    dim: 64
+  enabled: [lexical_diversity, semantic_anchor_sim, semantic_adjacent_sim]
+
+logging:
+  out_dir: outputs
+  experiment_name: memory_scaffolder_smoke
+  labels: { experiment: memory_scaffolder_smoke }
+  console_level: INFO
+  file_level: DEBUG

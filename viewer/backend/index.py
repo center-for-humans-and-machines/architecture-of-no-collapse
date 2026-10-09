@@ -19,6 +19,7 @@ RESOLVED_CONFIG_FILENAME = "resolved_config.yaml"
 TRANSCRIPT_FILENAME = "transcript.jsonl"
 METRICS_FILENAME = "metrics.parquet"
 EMBEDDINGS_FILENAME = "embeddings.parquet"
+MEMORIES_FILENAME = "memories.jsonl"
 
 
 @dataclass
@@ -40,6 +41,7 @@ class RunSummary:
     metrics_status: str | None
     metrics_enabled: list[str]
     has_metrics: bool
+    has_memories: bool
     labels: dict[str, str]
 
     def to_dict(self) -> dict[str, Any]:
@@ -61,6 +63,7 @@ class RunSummary:
             "metrics_status": self.metrics_status,
             "metrics_enabled": self.metrics_enabled,
             "has_metrics": self.has_metrics,
+            "has_memories": self.has_memories,
             "labels": self.labels,
         }
 
@@ -106,6 +109,7 @@ def load_summary(run_dir: Path) -> RunSummary | None:
         metrics_status=meta.get("metrics_status"),
         metrics_enabled=list(meta.get("metrics_enabled") or []),
         has_metrics=(run_dir / METRICS_FILENAME).exists(),
+        has_memories=(run_dir / MEMORIES_FILENAME).exists(),
         labels=dict(meta.get("labels") or {}),
     )
 

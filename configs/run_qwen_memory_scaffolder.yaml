@@ -1,0 +1,59 @@
+# Live memory-scaffolder run: run_qwen + a fourth `resurface` action.
+# The policy independently draws deepen / innovate / inject / resurface each
+# turn. Deepen and innovate are authored by the scaffolding LLM; inject uses
+# Tavily (from .env); resurface brings back a stored memory. Whenever a new
+# topic is introduced, the scaffolding LLM summarizes the topic that is ending
+# (at the looping model's max_tokens) and saves it as a memory, so it can be
+# resurfaced later and inspected offline in memories.jsonl.
+run:
+  rounds: 200
+  replicates: 5
+  seed: 0
+  window_size: 10
+  memory_turns: 5
+
+agents:
+  n: 1
+  params:
+    temperature: 0.9
+    max_tokens: 500
+  pool:
+    - { provider: vllm, model: Qwen/Qwen3-30B-A3B-Instruct-2507 }
+  prompt_source: prompts/prompts.yaml
+
+interventions:
+  - type: memory_scaffolder
+    options:
+      # 0.10 moved out of innovate into resurface.
+      probabilities:
+        deepen: 0.50
+        innovate: 0.30
+        inject: 0.10
+        resurface: 0.10
+      visibility: injections
+      # Inject a grounded starting topic before turn 0 (uses Tavily).
+      open_with_topic: true
+      # The shared scaffolding LLM that authors deepen/innovate steers and
+      # summarizes topics and memories.
+      llm: { provider: vllm, model: Qwen/Qwen3-30B-A3B-Instruct-2507 }
+      # Embedder used to vectorize each stored memory (for future selectors).
+      embedding: { provider: vllm, model: Qwen/Qwen3-Embedding-8B }
+      summarize: { enabled: true }
+      remember: { enabled: true }
+
+metrics:
+  window_size: 10
+  embedding:
+    provider: vllm
+    model: Qwen/Qwen3-Embedding-8B
+  enabled: [lexical_diversity, semantic_anchor_sim, semantic_adjacent_sim, cross_run_sim]
+
+logging:
+  out_dir: outputs
+  experiment_name: run_qwen_memory_scaffolder
+  labels:
+    experiment: run_qwen_memory_scaffolder
+    model: Qwen3-30B-A3B-Instruct-2507
+    condition: memory_scaffolder
+  console_level: INFO
+  file_level: DEBUG

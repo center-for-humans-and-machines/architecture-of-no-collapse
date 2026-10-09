@@ -66,11 +66,14 @@ def build_agents(config: RunConfig, seed: int) -> list[Agent]:
     return agents
 
 
-def build_interventions(config: RunConfig, seed: int) -> list:
+def build_interventions(
+    config: RunConfig, seed: int, *, memory_sink: object | None = None
+) -> list:
     """Build each configured intervention, passing the run seed to those that
-    opt in with ``uses_run_seed`` and the looping model's token budget to those
+    opt in with ``uses_run_seed``, the looping model's token budget to those
     that opt in with ``uses_loop_max_tokens`` (so a scaffolding LLM can size its
-    summaries to the model it steers)."""
+    summaries to the model it steers), and the run recorder to those that opt in
+    with ``uses_memory_sink`` (so a memory scaffolder can persist its memories)."""
     interventions: list = []
     for iv in config.interventions:
         target = Registry.get("intervention", iv.type)
@@ -79,6 +82,8 @@ def build_interventions(config: RunConfig, seed: int) -> list:
             options["seed"] = seed
         if getattr(target, "uses_loop_max_tokens", False):
             options["loop_max_tokens"] = config.agents.params.max_tokens
+        if getattr(target, "uses_memory_sink", False) and memory_sink is not None:
+            options["memory_sink"] = memory_sink
         interventions.append(target(**options))
     return interventions
 
@@ -106,7 +111,7 @@ async def run_replicate(
     llm_call_handler = _attach_llm_call_log(run_dir) if debug else None
     try:
         agents = build_agents(config, seed)
-        interventions = build_interventions(config, seed)
+        interventions = build_interventions(config, seed, memory_sink=recorder)
         scheduler = Scheduler(len(agents), seed)
 
         enabled = enabled_metrics(config, force=force_metrics)

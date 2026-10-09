@@ -23,6 +23,7 @@ outputs/<experiment_name>/[<condition>/]<timestamp>_seed<N>[_<n>]/
 | `resolved_config.yaml` | Fully resolved config with all defaults filled in | Run start |
 | `transcript.jsonl` | Canonical turns and intervention messages, one JSON object per line | Appended per turn |
 | `events.jsonl` | Lifecycle and per-turn events (`run_started`, `turn`, `intervention`, `condense`, `run_completed` / `run_failed`) | Appended per event |
+| `memories.jsonl` | Memory events from the `memory_scaffolder` (`memory_created`, `memory_surfaced`) | Appended per memory event |
 | `meta.json` | Run metadata and status (see below) | Updated on start/finish/fail |
 | `run.log` | Per-run log at `logging.file_level` | Throughout the run |
 | `llm_calls.jsonl` | One record per model call | Only with `--debug` |
@@ -57,6 +58,20 @@ A `condense` event marks a history compression: its `since_turn` is the first
 turn dropped and `removed_turns` lists every dropped index. The dropped messages
 remain in `transcript.jsonl`; only the loop's in-memory history is replaced by
 the recap (and, for the reflective scaffolder, the new topic).
+
+## `memories.jsonl`
+
+Written only by the `memory_scaffolder`; absent from other runs. Append-only,
+one JSON object per line, so a crashed run keeps its partial memory set:
+
+| Event | Fields | Meaning |
+| --- | --- | --- |
+| `memory_created` | `id`, `text`, `embedding`, `created_turn`, `since_turn`, `provenance`, `surfaced_count`, `last_surfaced_turn`, `selector` | A topic ended and was summarized into a memory. The embedding is the full unit-norm vector. |
+| `memory_surfaced` | `id`, `turn_index`, `surfaced_count`, `last_surfaced_turn`, `selector` | The memory was resurfaced on `turn_index`. |
+
+A memory's current state is its `memory_created` line plus every later
+`memory_surfaced` line. The [viewer](03_viewer.md) reconstructs the set (and
+summarizes the embedding to its dimension) for its **Memories** tab.
 
 ## `meta.json`
 
