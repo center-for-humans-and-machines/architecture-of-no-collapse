@@ -11,7 +11,7 @@ __pycache__/
 htmlcov/
 
 # Artifacts / outputs
-# outputs/
+outputs/
 *.parquet
 *.tmp
 
