@@ -102,6 +102,26 @@ def test_policy_inject_has_no_fixed_prompt():
         policy.prompt(Action.INJECT)
 
 
+def test_policy_accepts_custom_prompt_families():
+    policy = RandomPolicy(
+        _schedule(1.0, 0.0, 0.0),
+        seed=0,
+        deepen_prompts=["custom one", "custom two"],
+        innovate_prompts=["custom innovation"],
+    )
+    assert [policy.prompt(Action.DEEPEN) for _ in range(3)] == [
+        "custom one",
+        "custom two",
+        "custom one",
+    ]
+    assert policy.prompt(Action.INNOVATE) == "custom innovation"
+
+
+def test_policy_rejects_empty_custom_prompts():
+    with pytest.raises(ValueError):
+        RandomPolicy(_schedule(1.0, 0.0, 0.0), seed=0, deepen_prompts=[])
+
+
 # --- topic infuser ---------------------------------------------------------
 
 
@@ -338,6 +358,48 @@ def test_intervention_rejects_probabilities_not_summing_to_one():
     with pytest.raises(ValueError):
         RandomScaffolderIntervention(
             probabilities={"deepen": 0.5, "innovate": 0.5, "inject": 0.5},
+            sampler=_FakeSampler(),
+            search_client=_FakeSearch(),
+        )
+
+
+async def test_intervention_loads_deepen_prompts_from_yaml(tmp_path):
+    path = tmp_path / "deepen.yaml"
+    path.write_text(
+        "- id: a\n"
+        "  text: What could we assume instead?\n"
+        "- id: b\n"
+        "  text: What evidence supports this?\n",
+        encoding="utf-8",
+    )
+    iv = RandomScaffolderIntervention(
+        probabilities={"deepen": 1.0, "innovate": 0.0, "inject": 0.0},
+        deepen_prompts=path,
+        sampler=_FakeSampler(),
+        search_client=_FakeSearch(),
+    )
+    first = await iv.act([_assistant("topic A", 0)])
+    second = await iv.act([_assistant("topic B", 1)])
+    assert first.meta["level"] == "deepen"
+    assert first.content == "What could we assume instead?"
+    assert second.content == "What evidence supports this?"
+
+
+async def test_intervention_accepts_inline_deepen_prompts():
+    iv = RandomScaffolderIntervention(
+        probabilities={"deepen": 1.0, "innovate": 0.0, "inject": 0.0},
+        deepen_prompts=["Only prompt."],
+        sampler=_FakeSampler(),
+        search_client=_FakeSearch(),
+    )
+    message = await iv.act([_assistant("topic A", 0)])
+    assert message.content == "Only prompt."
+
+
+def test_intervention_rejects_empty_deepen_source():
+    with pytest.raises(ValueError):
+        RandomScaffolderIntervention(
+            deepen_prompts=[],
             sampler=_FakeSampler(),
             search_client=_FakeSearch(),
         )

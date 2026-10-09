@@ -10,6 +10,8 @@ search fails, so the conversation never breaks.
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
+from pathlib import Path
 from typing import Literal
 
 from renewal.core.message import Message
@@ -32,11 +34,16 @@ from renewal.interventions.random_scaffolder.words import (
     CommonWordSampler,
     WordSampler,
 )
+from renewal.prompts.loader import load_prompt_file
 from renewal.registry import Registry
 
 LOGGER = logging.getLogger(__name__)
 
 Visibility = Literal["all", "injections", "transient"]
+
+# A prompt family may be given inline or as a path to a YAML file of {id, text}
+# entries (the same format as prompts/prompts.yaml).
+PromptFamily = str | Path | Sequence[str]
 
 _INJECT_FALLBACK = (
     "It is time for a topic switch. Introduce a new topic with one clear "
@@ -96,6 +103,25 @@ def _as_distribution(probabilities: Distribution | dict | None) -> Distribution:
     raise ValueError(f"unsupported probabilities: {probabilities!r}")
 
 
+def _resolve_prompts(source: PromptFamily | None, *, level: str) -> list[str] | None:
+    """Resolve a deepen/innovate family from a YAML path or an inline list.
+
+    A ``str``/``Path`` names a YAML file of ``{id, text}`` entries (the same
+    format as ``prompts/prompts.yaml``); any other sequence is used as-is.
+    ``None`` keeps the policy's built-in family. The resolved family must be
+    non-empty, so a misconfigured source fails loudly at build time.
+    """
+    if source is None:
+        return None
+    if isinstance(source, (str, Path)):
+        texts = [prompt.text for prompt in load_prompt_file(Path(source))]
+    else:
+        texts = [str(text) for text in source]
+    if not texts:
+        raise ValueError(f"{level} prompt source is empty: {source!r}")
+    return texts
+
+
 @Registry.register("intervention", "random_scaffolder")
 class RandomScaffolderIntervention:
     """Three-level novelty scaffolder driven by independent random draws."""
@@ -118,6 +144,8 @@ class RandomScaffolderIntervention:
         max_excerpt_chars: int | None = None,
         search_depth: str = "basic",
         search_timeout: float = 8.0,
+        deepen_prompts: PromptFamily | None = None,
+        innovate_prompts: PromptFamily | None = None,
         sampler: WordSampler | None = None,
         search_client: SearchClient | None = None,
     ) -> None:
@@ -128,7 +156,10 @@ class RandomScaffolderIntervention:
 
         self.distribution = _as_distribution(probabilities)
         self._policy = RandomPolicy(
-            ConstantSchedule(self.distribution), seed=seed
+            ConstantSchedule(self.distribution),
+            seed=seed,
+            deepen_prompts=_resolve_prompts(deepen_prompts, level="deepen"),
+            innovate_prompts=_resolve_prompts(innovate_prompts, level="innovate"),
         )
         self._infuser = TopicInfuser(
             sampler or CommonWordSampler(seed=seed),

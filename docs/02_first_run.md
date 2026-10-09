@@ -53,6 +53,7 @@ The other run configs cover more of the harness:
 | `configs/run_qwen.yaml` | A real 100-round Qwen run with metrics |
 | `configs/run_qwen_scaffolder.yaml` | Real run + similarity-driven scaffolder |
 | `configs/run_qwen_random_scaffolder.yaml` | Real run + random scaffolder |
+| `configs/run_qwen_random_scaffolder_socratic.yaml` | Same, but the `deepen` level draws from the Socratic question bank |
 | `configs/run_qwen_reflective_llm_scaffolder.yaml` | Real run + LLM-driven reflective scaffolder |
 | `configs/run_qwen_no_scaffolding.yaml` | Control run with no intervention |
 | `configs/run_azure_random_scaffolder.yaml` | Azure agent + random scaffolder |

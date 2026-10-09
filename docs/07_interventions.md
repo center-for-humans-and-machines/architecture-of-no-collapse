@@ -126,6 +126,14 @@ the scaffolder (`num_words`, `search_top_k`, `max_excerpt_chars`,
 opening topic records no `probabilities` or `draw`, because it is not produced
 by a random draw.
 
+`deepen_prompts` and `innovate_prompts` optionally replace the built-in deepening
+and innovation wordings. Each accepts either a path to a YAML file of
+`{id, text}` entries (the same format as `prompts/prompts.yaml`) or an inline
+list of strings; omit them to keep the built-in families. For example,
+`configs/run_qwen_random_scaffolder_socratic.yaml` sets `deepen_prompts:
+prompts/socratic_question.yaml` to draw from a curated, non-LLM Socratic
+question bank while leaving `innovate` unchanged.
+
 Offline smoke (fake LLM, inject disabled so no Tavily call):
 
 ```bash

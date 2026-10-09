@@ -17,6 +17,7 @@ infuser and the intervention layer composes the final message.
 from __future__ import annotations
 
 import random
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
 from typing import Protocol
@@ -34,6 +35,16 @@ INNOVATE_PROMPTS = (
     "Add a new concept that changes how this topic can be viewed.",
     "Find a non-obvious neighboring idea and explain the connection.",
 )
+
+
+def _as_prompts(
+    level: str, prompts: Sequence[str] | None, fallback: tuple[str, ...]
+) -> tuple[str, ...]:
+    """Return a non-empty prompt family, falling back to the built-in one."""
+    chosen = fallback if prompts is None else tuple(prompts)
+    if not chosen:
+        raise ValueError(f"{level} prompts must not be empty")
+    return chosen
 
 
 class Action(str, Enum):
@@ -93,11 +104,24 @@ class ConstantSchedule:
 class RandomPolicy:
     """Sample one action per turn from a probability schedule."""
 
-    def __init__(self, schedule: ProbabilitySchedule, *, seed: int = 0) -> None:
+    def __init__(
+        self,
+        schedule: ProbabilitySchedule,
+        *,
+        seed: int = 0,
+        deepen_prompts: Sequence[str] | None = None,
+        innovate_prompts: Sequence[str] | None = None,
+    ) -> None:
         self._schedule = schedule
         self._rng = random.Random(seed)
         self._deepen_index = 0
         self._innovate_index = 0
+        self._deepen_prompts = _as_prompts(
+            "deepen", deepen_prompts, DEEPEN_PROMPTS
+        )
+        self._innovate_prompts = _as_prompts(
+            "innovate", innovate_prompts, INNOVATE_PROMPTS
+        )
 
     def draw(self, turn_index: int) -> tuple[Action, Distribution, float]:
         """Draw an action for ``turn_index`` and report how it was chosen.
@@ -123,11 +147,13 @@ class RandomPolicy:
     def prompt(self, action: Action) -> str:
         """Return the next rotating prompt for a DEEPEN/INNOVATE action."""
         if action == Action.DEEPEN:
-            text = DEEPEN_PROMPTS[self._deepen_index % len(DEEPEN_PROMPTS)]
+            text = self._deepen_prompts[self._deepen_index % len(self._deepen_prompts)]
             self._deepen_index += 1
             return text
         if action == Action.INNOVATE:
-            text = INNOVATE_PROMPTS[self._innovate_index % len(INNOVATE_PROMPTS)]
+            text = self._innovate_prompts[
+                self._innovate_index % len(self._innovate_prompts)
+            ]
             self._innovate_index += 1
             return text
         raise ValueError(

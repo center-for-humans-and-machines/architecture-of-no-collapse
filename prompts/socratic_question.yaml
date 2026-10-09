@@ -1,0 +1,212 @@
+# Socratic question bank, for the scaffolder's `deepen` level.
+#
+# Canonical taxonomy: Richard Paul & Linda Elder, "The Art of Socratic
+# Questioning" (Foundation for Critical Thinking, 2006), six types:
+# clarification, assumptions, reasons/evidence, viewpoints, implications,
+# and questions about the question. The last three groups (purpose, concepts,
+# inferences/interpretations) are the widely reproduced 9-type expansion
+# (e.g. Virginia Tech / UBC handouts, "reproduced with permission").
+#
+# Format matches prompts/prompts.yaml: a list of {id, text}. The `category`
+# key is informational only (renewal.prompts.loader ignores extra keys), so the
+# file stays loadable by load_prompt_file while keeping the grouping readable.
+
+- id: clarify_01
+  category: clarification
+  text: What do you mean by that?
+- id: clarify_02
+  category: clarification
+  text: Could you put that another way?
+- id: clarify_03
+  category: clarification
+  text: What is your main point here?
+- id: clarify_04
+  category: clarification
+  text: Why do you say that?
+- id: clarify_05
+  category: clarification
+  text: How does this relate to what we have been discussing earier?
+- id: clarify_06
+  category: clarification
+  text: Could you give me an example?
+- id: clarify_07
+  category: clarification
+  text: Could you explain that further?
+- id: clarify_09
+  category: clarification
+  text: What is the main issue here?
+- id: clarify_10
+  category: clarification
+  text: Can you rephrase that more precisely?
+- id: clarify_11
+  category: clarification
+  text: What do we already know about this?
+- id: clarify_12
+  category: clarification
+  text: What is the nature of this, exactly?
+
+- id: assume_01
+  category: assumptions
+  text: What are you assuming here?
+- id: assume_02
+  category: assumptions
+  text: What could we assume instead?
+- id: assume_03
+  category: assumptions
+  text: How can you verify or disprove that assumption?
+- id: assume_04
+  category: assumptions
+  text: Is this always the case, or only sometimes?
+- id: assume_05
+  category: assumptions
+  text: Why do you think this assumption holds here?
+- id: assume_06
+  category: assumptions
+  text: On what basis do you hold this view?
+- id: assume_07
+  category: assumptions
+  text: What would have to be true for this to hold?
+- id: assume_08
+  category: assumptions
+  text: What are we taking for granted without saying so?
+
+- id: reason_01
+  category: reasons_and_evidence
+  text: Why is that happening?
+- id: reason_02
+  category: reasons_and_evidence
+  text: How do you know this?
+- id: reason_03
+  category: reasons_and_evidence
+  text: What would be an example of that?
+- id: reason_04
+  category: reasons_and_evidence
+  text: What evidence supports what you are saying?
+- id: reason_05
+  category: reasons_and_evidence
+  text: What do you think causes this, and why?
+- id: reason_06
+  category: reasons_and_evidence
+  text: Are these reasons good enough and why would you think so?
+- id: reason_07
+  category: reasons_and_evidence
+  text: Would this stand up to scrutiny, explain why?
+- id: reason_08
+  category: reasons_and_evidence
+  text: How might it be refuted?
+- id: reason_09
+  category: reasons_and_evidence
+  text: On what authority are you basing your argument?
+- id: reason_10
+  category: reasons_and_evidence
+  text: Is there reason to doubt that evidence?
+- id: reason_11
+  category: reasons_and_evidence
+  text: How reliable is the source, and how would we know?
+- id: reason_12
+  category: reasons_and_evidence
+  text: Could this be explained another way?
+
+- id: view_01
+  category: viewpoints_and_perspectives
+  text: What is an alternative way to look at this?
+- id: view_02
+  category: viewpoints_and_perspectives
+  text: Who benefits from this, and who is burdened?
+- id: view_03
+  category: viewpoints_and_perspectives
+  text: What are the strengths and weaknesses of this?
+- id: view_04
+  category: viewpoints_and_perspectives
+  text: What is the strongest counterargument? Make it.
+- id: view_05
+  category: viewpoints_and_perspectives
+  text: Who would disagree, and why?
+- id: view_06
+  category: viewpoints_and_perspectives
+  text: How would this look from the other side?
+- id: view_07
+  category: viewpoints_and_perspectives
+  text: What would someone from a completely different background say?
+- id: view_08
+  category: viewpoints_and_perspectives
+  text: How do these two things compare?
+- id: view_09
+  category: viewpoints_and_perspectives
+  text: Why is this better than the alternative?
+
+- id: implica_01
+  category: implications_and_consequences
+  text: Then what would happen?
+- id: implica_02
+  category: implications_and_consequences
+  text: What are the consequences of that assumption?
+- id: implica_03
+  category: implications_and_consequences
+  text: What are you implying?
+- id: implica_04
+  category: implications_and_consequences
+  text: What are the implications of this?
+- id: implica_05
+  category: implications_and_consequences
+  text: How does this affect the rest of the picture?
+- id: implica_06
+  category: implications_and_consequences
+  text: How does this fit with what we already know?
+- id: implica_07
+  category: implications_and_consequences
+  text: What follows if this is true?
+- id: implica_08
+  category: implications_and_consequences
+  text: What if you are wrong?
+- id: implica_09
+  category: implications_and_consequences
+  text: What would change if the opposite were true?
+
+- id: purpose_01
+  category: purpose
+  text: What is the purpose here?
+- id: purpose_02
+  category: purpose
+  text: What are we trying to accomplish with this conversation?
+- id: purpose_03
+  category: purpose
+  text: What is the central aim of this line of thought?
+- id: purpose_04
+  category: purpose
+  text: Whose goals does this serve?
+- id: purpose_05
+  category: purpose
+  text: What other concepts do we need to consider?
+
+- id: concept_01
+  category: concepts
+  text: What is the core concept here?
+- id: concept_02
+  category: concepts
+  text: How would you define the key term?
+- id: concept_03
+  category: concepts
+  text: What does this concept presuppose?
+- id: concept_04
+  category: concepts
+  text: Where does this concept break down?
+- id: concept_05
+  category: concepts
+  text: What other concept does this resemble or contrast with?
+
+- id: infer_01
+  category: inferences_and_interpretations
+  text: What can you infer from this?
+- id: infer_02
+  category: inferences_and_interpretations
+  text: What conclusion follows from everything we said so far?
+- id: infer_03
+  category: inferences_and_interpretations
+  text: Is there another plausible interpretation?
+- id: infer_04
+  category: inferences_and_interpretations
+  text: What interpretation are you treating as fact?
+- id: infer_05
+  category: inferences_and_interpretations
+  text: How did you arrive at that conclusion?
