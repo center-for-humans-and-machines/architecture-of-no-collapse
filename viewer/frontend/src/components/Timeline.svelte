@@ -14,7 +14,10 @@
         runIds.map(async (id) => ({ id, rows: await api.metrics(id) }))
       );
       const perWindow = new Map();
+      const experiments = new Map(); // run id -> experiment name
       for (const { id, rows } of all) {
+        const experiment = rows.find((row) => row.experiment)?.experiment;
+        if (experiment) experiments.set(id, experiment);
         for (const row of rows) {
           if (row.cadence !== 'per_window') continue;
           if (!perWindow.has(row.metric)) perWindow.set(row.metric, []);
@@ -25,8 +28,9 @@
       for (const [metric, points] of perWindow) {
         const traces = runIds.map((id) => {
           const pts = points.filter((p) => p.id === id).sort((a, b) => a.index - b.index);
+          const experiment = experiments.get(id);
           return {
-            name: id.slice(0, 8),
+            name: experiment ? `${experiment} / ${id.slice(0, 8)}` : id.slice(0, 8),
             x: pts.map((p) => p.index),
             y: pts.map((p) => p.value),
           };
