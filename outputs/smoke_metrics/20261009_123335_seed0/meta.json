@@ -1,0 +1,40 @@
+{
+  "embedding_model": "fake",
+  "experiment_name": "smoke_metrics",
+  "finished_at": "2026-10-09T10:33:36+00:00",
+  "git_commit": "5bd9be2b02b853abb0acc6996fd057a90165ca0a",
+  "git_dirty": true,
+  "labels": {
+    "experiment": "smoke_metrics"
+  },
+  "metrics_enabled": [
+    "lexical_diversity",
+    "semantic_anchor_sim",
+    "semantic_adjacent_sim",
+    "cross_run_sim"
+  ],
+  "metrics_status": "completed",
+  "models": [
+    {
+      "model": "fake",
+      "provider": "fake"
+    },
+    {
+      "model": "fake",
+      "provider": "fake"
+    },
+    {
+      "model": "fake",
+      "provider": "fake"
+    }
+  ],
+  "n_agents": 3,
+  "python": "3.13.2",
+  "requires_env": [],
+  "rounds": 30,
+  "run_id": "ea439acba746",
+  "seed": 0,
+  "started_at": "2026-10-09T10:33:35+00:00",
+  "status": "completed",
+  "window_size": 10
+}
